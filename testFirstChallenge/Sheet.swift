@@ -9,23 +9,37 @@
 import Foundation
 
 
-
 class Sheet  {
     
+    var cells:[String : String] = [:]
     
-    var dict:[String : String] = [:]
-    
-    
-    func get(_ key:String) -> String {
-
-        guard dict[key] != nil else {
+    func get(_ key: String) -> String {
+        guard let value = cells[key] else {
             return ""
         }
-        return dict[key]!
+        
+        let trimmedValue = value.trimmingCharacters(in: .whitespaces)
+        
+        if (trimmedValue.isEmpty) {
+            return ""
+        }
+        
+        guard let valueToInt = Int(trimmedValue) else {
+            return value
+        }
+        
+        return "\(valueToInt)"
     }
     
-    func put (_ key:String, _ value:String) {
-        dict[key] = value
+    func put (_ key: String, _ value: String) {
+        cells[key] = value
+    }
+    
+    func getLiteral(_ key: String) -> String {
+        guard let value = cells[key] else {
+            return ""
+        }
+        return value
     }
 }
 
