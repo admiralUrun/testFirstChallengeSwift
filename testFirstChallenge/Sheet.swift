@@ -8,19 +8,32 @@
 
 import Foundation
 
-
 class Sheet  {
     
-    var cells:[String : String] = [:]
+    typealias Key = String
+    typealias Value = String
     
-    func get(_ key: String) -> String {
+    var cells:[Key : Value] = [:]
+    
+    func get(_ key: Key) -> Value {
         guard let value = cells[key] else {
             return ""
         }
         
+        if isItEmpty(value: value) {
+            return ""
+        }
+        
+        if value[value.startIndex] == "=" {
+            var trimmedFormul = Array(value)
+            
+            trimmedFormul.remove(at: 0)
+            return Value(trimmedFormul)
+        }
+        
         let trimmedValue = value.trimmingCharacters(in: .whitespaces)
         
-        if (trimmedValue.isEmpty) {
+        if isItEmpty(value: trimmedValue) {
             return ""
         }
         
@@ -31,16 +44,29 @@ class Sheet  {
         return "\(valueToInt)"
     }
     
-    func put (_ key: String, _ value: String) {
+    
+    func put (_ key: Key, _ value: Value) {
         cells[key] = value
     }
     
-    func getLiteral(_ key: String) -> String {
+    
+    func getLiteral(_ key: Key) -> Value {
         guard let value = cells[key] else {
             return ""
         }
         return value
     }
+    
+    // privat funcS
+    
+    private func isItEmpty(value string: Value) -> Bool {
+        if string.isEmpty {
+            return true
+        }
+        return false
+    }
+    
+    
 }
 
 

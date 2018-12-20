@@ -1,17 +1,18 @@
 //
-//  testFirstChallengeTests.swift
+//  SheetTests.swift
 //  testFirstChallengeTests
 //
-//  Created by Andrew Yakovenko on 12/17/18.
+//  Created by Andrew Yakovenko on 12/19/18.
 //  Copyright © 2018 Andrew Yakovenko. All rights reserved.
 //
 
 import XCTest
 @testable import testFirstChallenge
 
-class testFirstChallengeTests: XCTestCase {
+class SheetTests: XCTestCase {
     
     override func setUp() {
+        
     }
     
     func testThatCellsAreEmptyByDefault() {
@@ -86,4 +87,28 @@ class testFirstChallengeTests: XCTestCase {
         testSheet.put(theCell, "=7")
         XCTAssertEqual("=7", testSheet.getLiteral(theCell))
     }
+    
+    func testFormulaSpec() {
+        let testSheet = Sheet()
+        
+        testSheet.put("B1", " =7")
+        XCTAssertEqual(" =7", testSheet.get("B1"))
+        XCTAssertEqual(" =7", testSheet.getLiteral("B1"))
+    }
+    
+    func testConstantFormula()  {
+        let testSheet = Sheet()
+        testSheet.put("A1", "=7")
+        XCTAssertEqual("=7", testSheet.getLiteral("A1"))
+        XCTAssertEqual("7", testSheet.get("A1"))
+        
+    }
+    
+    func testParentheses() {
+        let testSheet = Sheet()
+        testSheet.put("A1", "=(7) ")
+        XCTAssertEqual("7", testSheet.get("A1"))
+        
+    }
+    
 }
