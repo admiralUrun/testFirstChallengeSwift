@@ -13,27 +13,24 @@ class Sheet  {
     typealias Key = String
     typealias Value = String
     
-    var cells:[Key : Value] = [:]
+private var cells:[Key : Value] = [:]
     
     func get(_ key: Key) -> Value {
         guard let value = cells[key] else {
             return ""
         }
         
-        if isItEmpty(value: value) {
+        if value.isEmpty {
             return ""
         }
         
-        if value[value.startIndex] == "=" {
-            var trimmedFormul = Array(value)
-            
-            trimmedFormul.remove(at: 0)
-            return Value(trimmedFormul)
+        if value.first == "=" {
+            return returnValue(formul: value)
         }
         
         let trimmedValue = value.trimmingCharacters(in: .whitespaces)
         
-        if isItEmpty(value: trimmedValue) {
+        if trimmedValue.isEmpty {
             return ""
         }
         
@@ -57,14 +54,31 @@ class Sheet  {
         return value
     }
     
-    // privat funcS
+    // private
     
-    private func isItEmpty(value string: Value) -> Bool {
-        if string.isEmpty {
-            return true
+    private func returnValue(formul:Value) -> Value {
+        let value: Value
+        var insedeValue = ""
+        
+        for character in formul {
+            
+            if let vauleInInt = Int(String(character))  {
+                if insedeValue.isEmpty {
+                    insedeValue = "\(vauleInInt)"
+                } else {
+                    insedeValue += "\(vauleInInt)"
+                }
+            } else {
+                continue
+            }
         }
-        return false
+    
+        value = insedeValue
+        return value
     }
+    
+    
+    
     
     
 }
