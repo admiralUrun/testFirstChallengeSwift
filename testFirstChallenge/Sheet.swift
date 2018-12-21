@@ -13,34 +13,29 @@ class Sheet  {
     typealias Key = String
     typealias Value = String
     
-private var cells:[Key : Value] = [:]
+    private var cells:[Key : Value] = [:]
     
     func get(_ key: Key) -> Value {
         guard let value = cells[key] else {
             return ""
         }
-        
-        if value.isEmpty {
-            return ""
-        }
-        
-        if value.first == "=" {
-            return returnValue(formul: value)
-        }
-        
+
         let trimmedValue = value.trimmingCharacters(in: .whitespaces)
         
         if trimmedValue.isEmpty {
             return ""
         }
-        
-        guard let valueToInt = Int(trimmedValue) else {
-            return value
+
+        if let valueAsInt = Int(trimmedValue) {
+            return String(valueAsInt)
         }
         
-        return "\(valueToInt)"
+        if value.first == "=" {
+            return evaluate(formula: Array(value))
+        }
+        
+        return value
     }
-    
     
     func put (_ key: Key, _ value: Value) {
         cells[key] = value
@@ -54,43 +49,122 @@ private var cells:[Key : Value] = [:]
         return value
     }
     
-    // private
+    // MARK: -
     
-    private func returnValue(formul:Value) -> Value {
+    private func evaluate(formula:[Character]) -> Value {
         let value: Value
-        var insedeValue = ""
+        var beforOperator = ""
+        var afterOperator = ""
+        var lastOperator = ""
         
-        for character in formul {
+        for index in 0 ..< formula.count {
             
-            if let vauleInInt = Int(String(character))  {
-                if insedeValue.isEmpty {
-                    insedeValue = "\(vauleInInt)"
+            let symbol = Value(formula[index])
+            
+            if index != formula.count - 1  {
+                
+                if let symbolInInt = Int(symbol)  {
+                    
+                    if beforOperator.isEmpty {
+                        beforOperator = "\(symbolInInt)"
+                    } else {
+                        beforOperator += "\(symbolInInt)"
+                    }
+                    
                 } else {
-                    insedeValue += "\(vauleInInt)"
+                    let triger = symbol
+                    
+                    switch triger {
+                    case "*":
+                        if lastOperator.isEmpty {
+                            if afterOperator.isEmpty {
+                                afterOperator = beforOperator
+                                beforOperator = ""
+                            } else {
+                                guard let beforTriger = Int(afterOperator) else {
+                                assertionFailure()
+                                    return ""
+                                }
+                                
+                                guard let afterTriger = Int(beforOperator) else {
+                                assertionFailure()
+                                    return ""
+                                }
+                                
+                                afterOperator = Value(beforTriger * afterTriger)
+                                beforOperator = ""
+                            }
+                            lastOperator = "*"
+                        } else {
+                            guard let beforTriger = Int(afterOperator) else {
+                                assertionFailure()
+                                return ""
+                            }
+                            
+                            guard let afterTriger = Int(beforOperator) else {
+                                assertionFailure()
+                                return ""
+                            }
+                            afterOperator = Value(beforTriger * afterTriger)
+                            beforOperator = ""
+                        }
+                    case "+":
+                        return ""
+                    default:
+                        continue
+                    }
                 }
             } else {
-                continue
+                
+                guard let symbolInInt = Int(symbol) else {
+                    
+                    if beforOperator.isEmpty {
+                        return afterOperator
+                    } else {
+                        if lastOperator.isEmpty {
+                            return beforOperator
+                        } else {
+                            guard let beforValueAsInt = Int(beforOperator), let afterValueAsInt = Int(afterOperator) else {
+                            return ""
+                            }
+                            switch lastOperator {
+                            case "*":
+                            return String(beforValueAsInt * afterValueAsInt)
+                            default:
+                                assertionFailure()
+                            }
+                            
+                        }
+                    }
+                    return ""
+                }
+                
+                if beforOperator.isEmpty {
+                    beforOperator = "\(symbolInInt)"
+                } else {
+                    beforOperator += "\(symbolInInt)"
+                }
+                
+                if afterOperator.isEmpty {
+                    return beforOperator
+                } else {
+                    guard let beforValueAsInt = Int(beforOperator), let afterValueAsInt = Int(afterOperator) else {
+                        assertionFailure()
+                        return ""
+                    }
+                    switch lastOperator {
+                    case "*":
+                        return String(beforValueAsInt * afterValueAsInt)
+                    default:
+                        assertionFailure()
+                    }
+                }
+                
             }
         }
-    
-        value = insedeValue
+        
+        value = beforOperator
         return value
     }
     
-    
-    
-    
-    
 }
-
-
-
-
-
-
-
-
-
-
-
-

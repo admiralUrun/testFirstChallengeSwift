@@ -109,6 +109,7 @@ class SheetTests: XCTestCase {
         testSheet.put("A1", "=(7) ")
         XCTAssertEqual("7", testSheet.get("A1"))
     }
+    
     func testDeepParentheses() {
         let testSheet = Sheet()
         testSheet.put("A1", "=((((10))))")
@@ -116,5 +117,13 @@ class SheetTests: XCTestCase {
             
         }
     
+    func testMultiply() {
+        let testSheep = Sheet()
+        testSheep.put("A1", "=2*3*4")
+        XCTAssertEqual("24", testSheep.get("A1"))
+        
+        
+        
+    }
     
 }
