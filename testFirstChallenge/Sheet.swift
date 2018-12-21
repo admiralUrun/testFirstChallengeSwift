@@ -19,13 +19,13 @@ class Sheet  {
         guard let value = cells[key] else {
             return ""
         }
-
+        
         let trimmedValue = value.trimmingCharacters(in: .whitespaces)
         
         if trimmedValue.isEmpty {
             return ""
         }
-
+        
         if let valueAsInt = Int(trimmedValue) {
             return String(valueAsInt)
         }
@@ -55,6 +55,7 @@ class Sheet  {
         let value: Value
         var beforOperator = ""
         var afterOperator = ""
+        
         var lastOperator = ""
         
         for index in 0 ..< formula.count {
@@ -65,11 +66,7 @@ class Sheet  {
                 
                 if let symbolInInt = Int(symbol)  {
                     
-                    if beforOperator.isEmpty {
-                        beforOperator = "\(symbolInInt)"
-                    } else {
-                        beforOperator += "\(symbolInInt)"
-                    }
+                    beforOperator = addToString(symbolInInt: symbolInInt, befor: beforOperator)
                     
                 } else {
                     let triger = symbol
@@ -81,13 +78,8 @@ class Sheet  {
                                 afterOperator = beforOperator
                                 beforOperator = ""
                             } else {
-                                guard let beforTriger = Int(afterOperator) else {
-                                assertionFailure()
-                                    return ""
-                                }
-                                
-                                guard let afterTriger = Int(beforOperator) else {
-                                assertionFailure()
+                                guard let beforTriger = Int(afterOperator), let afterTriger = Int(beforOperator) else {
+                                    assertionFailure()
                                     return ""
                                 }
                                 
@@ -96,15 +88,11 @@ class Sheet  {
                             }
                             lastOperator = "*"
                         } else {
-                            guard let beforTriger = Int(afterOperator) else {
+                            guard let beforTriger = Int(afterOperator), let afterTriger = Int(beforOperator) else {
                                 assertionFailure()
                                 return ""
                             }
                             
-                            guard let afterTriger = Int(beforOperator) else {
-                                assertionFailure()
-                                return ""
-                            }
                             afterOperator = Value(beforTriger * afterTriger)
                             beforOperator = ""
                         }
@@ -125,11 +113,11 @@ class Sheet  {
                             return beforOperator
                         } else {
                             guard let beforValueAsInt = Int(beforOperator), let afterValueAsInt = Int(afterOperator) else {
-                            return ""
+                                return ""
                             }
                             switch lastOperator {
                             case "*":
-                            return String(beforValueAsInt * afterValueAsInt)
+                                return String(beforValueAsInt * afterValueAsInt)
                             default:
                                 assertionFailure()
                             }
@@ -139,11 +127,7 @@ class Sheet  {
                     return ""
                 }
                 
-                if beforOperator.isEmpty {
-                    beforOperator = "\(symbolInInt)"
-                } else {
-                    beforOperator += "\(symbolInInt)"
-                }
+             beforOperator = addToString(symbolInInt: symbolInInt, befor: beforOperator)
                 
                 if afterOperator.isEmpty {
                     return beforOperator
@@ -163,8 +147,19 @@ class Sheet  {
             }
         }
         
-        value = beforOperator
-        return value
+        assertionFailure()
+        return ""
+    }
+    
+    private func addToString(symbolInInt:Int, befor:String) -> String {
+        var beforOperator = befor
+        if befor.isEmpty {
+             beforOperator = "\(symbolInInt)"
+            return beforOperator
+        } else {
+            beforOperator += "\(symbolInInt)"
+            return beforOperator
+        }
     }
     
 }

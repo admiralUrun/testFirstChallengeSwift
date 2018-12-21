@@ -121,9 +121,7 @@ class SheetTests: XCTestCase {
         let testSheep = Sheet()
         testSheep.put("A1", "=2*3*4")
         XCTAssertEqual("24", testSheep.get("A1"))
-        
-        
-        
+
     }
     
 }
