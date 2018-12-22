@@ -52,7 +52,6 @@ class Sheet  {
     // MARK: -
     
     private func evaluate(formula:[Character]) -> Value {
-        let value: Value
         var beforOperator = ""
         var afterOperator = ""
         
@@ -69,31 +68,21 @@ class Sheet  {
                     beforOperator = addToString(symbolInInt: symbolInInt, befor: beforOperator)
                     
                 } else {
-                    let triger = symbol
                     
-                    switch triger {
+                    switch symbol {
                     case "*":
                         if lastOperator.isEmpty {
                             if afterOperator.isEmpty {
                                 afterOperator = beforOperator
                                 beforOperator = ""
                             } else {
-                                guard let beforTriger = Int(afterOperator), let afterTriger = Int(beforOperator) else {
-                                    assertionFailure()
-                                    return ""
-                                }
-                                
-                                afterOperator = Value(beforTriger * afterTriger)
+                                afterOperator = operatorMultiplication(first: beforOperator, second: afterOperator)
                                 beforOperator = ""
                             }
                             lastOperator = "*"
                         } else {
-                            guard let beforTriger = Int(afterOperator), let afterTriger = Int(beforOperator) else {
-                                assertionFailure()
-                                return ""
-                            }
                             
-                            afterOperator = Value(beforTriger * afterTriger)
+                            afterOperator = operatorMultiplication(first: beforOperator, second: afterOperator)
                             beforOperator = ""
                         }
                     case "+":
@@ -112,54 +101,51 @@ class Sheet  {
                         if lastOperator.isEmpty {
                             return beforOperator
                         } else {
-                            guard let beforValueAsInt = Int(beforOperator), let afterValueAsInt = Int(afterOperator) else {
-                                return ""
-                            }
-                            switch lastOperator {
-                            case "*":
-                                return String(beforValueAsInt * afterValueAsInt)
-                            default:
-                                assertionFailure()
-                            }
-                            
+                            return lastOperation(lastOperator: lastOperator, beforOperator: beforOperator, afterOperator: afterOperator)
                         }
                     }
-                    return ""
                 }
                 
-             beforOperator = addToString(symbolInInt: symbolInInt, befor: beforOperator)
+                beforOperator = addToString(symbolInInt: symbolInInt, befor: beforOperator)
                 
                 if afterOperator.isEmpty {
                     return beforOperator
                 } else {
-                    guard let beforValueAsInt = Int(beforOperator), let afterValueAsInt = Int(afterOperator) else {
-                        assertionFailure()
-                        return ""
-                    }
-                    switch lastOperator {
-                    case "*":
-                        return String(beforValueAsInt * afterValueAsInt)
-                    default:
-                        assertionFailure()
-                    }
+                    return lastOperation(lastOperator: lastOperator, beforOperator: beforOperator, afterOperator: afterOperator)
                 }
-                
             }
         }
-        
         assertionFailure()
         return ""
     }
     
-    private func addToString(symbolInInt:Int, befor:String) -> String {
+    private func addToString(symbolInInt:Int, befor:String) -> Value {
         var beforOperator = befor
         if befor.isEmpty {
-             beforOperator = "\(symbolInInt)"
+            beforOperator = "\(symbolInInt)"
             return beforOperator
         } else {
             beforOperator += "\(symbolInInt)"
             return beforOperator
         }
+    }
+    
+    private func operatorMultiplication(first:Value, second:Value) -> Value {
+        guard let beforTriger = Int(first), let afterTriger = Int(second) else {
+            return ""
+        }
+        
+        return Value(beforTriger * afterTriger)
+    }
+    
+    private func lastOperation(lastOperator:String, beforOperator:Value, afterOperator:Value) -> Value {
+        switch lastOperator {
+        case "*":
+            return operatorMultiplication(first: beforOperator, second: afterOperator)
+        default:
+            assertionFailure()
+        }
+        return ""
     }
     
 }
