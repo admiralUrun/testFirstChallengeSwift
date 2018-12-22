@@ -10,12 +10,12 @@ import Foundation
 
 class Sheet  {
     
-    typealias Key = String
+    typealias Adress = String
     typealias Value = String
     
-    private var cells:[Key : Value] = [:]
+    private var cells:[Adress : String] = [:]
     
-    func get(_ key: Key) -> Value {
+    func get(_ key: Adress) -> String {
         guard let value = cells[key] else {
             return ""
         }
@@ -37,12 +37,12 @@ class Sheet  {
         return value
     }
     
-    func put (_ key: Key, _ value: Value) {
+    func put (_ key: Adress, _ value: String) {
         cells[key] = value
     }
     
     
-    func getLiteral(_ key: Key) -> Value {
+    func getLiteral(_ key: Adress) -> String {
         guard let value = cells[key] else {
             return ""
         }
@@ -64,11 +64,8 @@ class Sheet  {
             if index != formula.count - 1  {
                 
                 if let symbolInInt = Int(symbol)  {
-                    
                     beforOperator = addToString(symbolInInt: symbolInInt, befor: beforOperator)
-                    
                 } else {
-                    
                     switch symbol {
                     case "*":
                         if lastOperator.isEmpty {
@@ -129,15 +126,6 @@ class Sheet  {
             return beforOperator
         }
     }
-    
-    private func operatorMultiplication(first:Value, second:Value) -> Value {
-        guard let beforTriger = Int(first), let afterTriger = Int(second) else {
-            return ""
-        }
-        
-        return Value(beforTriger * afterTriger)
-    }
-    
     private func lastOperation(lastOperator:String, beforOperator:Value, afterOperator:Value) -> Value {
         switch lastOperator {
         case "*":
@@ -146,6 +134,13 @@ class Sheet  {
             assertionFailure()
         }
         return ""
+    }
+    
+    private func operatorMultiplication(first:Value, second:Value) -> Value {
+        guard let beforTriger = Int(first), let afterTriger = Int(second) else {
+            return ""
+        }
+        return Value(beforTriger * afterTriger)
     }
     
 }
