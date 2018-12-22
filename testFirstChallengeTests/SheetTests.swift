@@ -123,10 +123,17 @@ class SheetTests: XCTestCase {
         XCTAssertEqual("24", testSheep.get("A1"))
 
     }
+    
     func testAdd() {
         let testSheep = Sheet()
         testSheep.put("A1", "=71+2+3")
         XCTAssertEqual("76", testSheep.get("A1"))
+    }
+    
+    func testOperationPrecedence() {
+        let testSheep = Sheet()
+        testSheep.put("A1", "=1+2*3")
+        XCTAssertEqual("9", testSheep.get("A1"))
     }
     
 }

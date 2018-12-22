@@ -10,12 +10,12 @@ import Foundation
 
 class Sheet  {
     
-    typealias Adress = String
+    typealias Address = String
     typealias Value = String
     
-    private var cells:[Adress : String] = [:]
+    private var cells:[Address : String] = [:]
     
-    func get(_ key: Adress) -> String {
+    func get(_ key: Address) -> String {
         guard let value = cells[key] else {
             return ""
         }
@@ -37,12 +37,11 @@ class Sheet  {
         return value
     }
     
-    func put (_ key: Adress, _ value: String) {
+    func put (_ key: Address, _ value: String) {
         cells[key] = value
     }
     
-    
-    func getLiteral(_ key: Adress) -> String {
+    func getLiteral(_ key: Address) -> String {
         guard let value = cells[key] else {
             return ""
         }
@@ -61,7 +60,7 @@ class Sheet  {
             
             let symbol = Value(formula[index])
             
-            if index != formula.count - 1  {
+            if index != formula.count - 1 {
                 
                 if let symbolInInt = Int(symbol)  {
                     beforOperator = addToString(symbolInInt: symbolInInt, befor: beforOperator)
@@ -79,8 +78,9 @@ class Sheet  {
                             lastOperator = "*"
                         } else {
                             
-                            afterOperator = operatorMultiplication(first: beforOperator, second: afterOperator)
+                            afterOperator = lastOperation(lastOperator: lastOperator, beforOperator: beforOperator, afterOperator: afterOperator)
                             beforOperator = ""
+                            lastOperator = "*"
                         }
                     case "+":
                         if lastOperator.isEmpty {
@@ -93,8 +93,9 @@ class Sheet  {
                             }
                             lastOperator = "+"
                         } else {
-                            afterOperator = operatorContinuation(first: beforOperator, second: afterOperator)
+                            afterOperator = lastOperation(lastOperator: lastOperator, beforOperator: beforOperator, afterOperator: afterOperator)
                             beforOperator = ""
+                            lastOperator = "+"
                         }
                     default:
                         continue
@@ -138,6 +139,7 @@ class Sheet  {
             return beforOperator
         }
     }
+    
     private func lastOperation(lastOperator:String, beforOperator:Value, afterOperator:Value) -> Value {
         switch lastOperator {
         case "*":
