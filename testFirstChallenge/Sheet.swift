@@ -83,7 +83,19 @@ class Sheet  {
                             beforOperator = ""
                         }
                     case "+":
-                        return ""
+                        if lastOperator.isEmpty {
+                            if afterOperator.isEmpty {
+                                afterOperator = beforOperator
+                                beforOperator = ""
+                            } else {
+                                afterOperator = operatorContinuation(first: beforOperator, second: afterOperator)
+                                beforOperator = ""
+                            }
+                            lastOperator = "+"
+                        } else {
+                            afterOperator = operatorContinuation(first: beforOperator, second: afterOperator)
+                            beforOperator = ""
+                        }
                     default:
                         continue
                     }
