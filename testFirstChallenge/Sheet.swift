@@ -130,10 +130,19 @@ class Sheet  {
         switch lastOperator {
         case "*":
             return operatorMultiplication(first: beforOperator, second: afterOperator)
+        case "+":
+            return operatorContinuation(first: beforOperator, second: afterOperator)
         default:
             assertionFailure()
         }
         return ""
+    }
+    
+    private func operatorContinuation(first:Value, second:Value) -> Value {
+        guard let beforTriger = Int(first), let afterTriger = Int(second) else {
+            return ""
+        }
+        return Value(beforTriger + afterTriger)
     }
     
     private func operatorMultiplication(first:Value, second:Value) -> Value {
