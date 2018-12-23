@@ -160,7 +160,7 @@ class Sheet  {
         return ""
     }
     
-    // MARK: - Need func
+    // MARK: - evaluateLogic
     
     private func afterOperatorMultiplication(afterOperator:Value, beforOperator:Value) -> Value {
         if afterOperator.isEmpty {
