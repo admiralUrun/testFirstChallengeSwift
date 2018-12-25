@@ -31,9 +31,8 @@ class Sheet  {
         }
         
         if value.first == "=" {
-            return evaluate(formula: tokenezer(formula: Array(value)))
+            return evaluate(formula: tokenize(formula: Array(value)))
         }
-        
         return value
     }
     
@@ -50,162 +49,149 @@ class Sheet  {
     
     // MARK: - Token
     
-    enum token {
+    enum Token {
         case multiplication
         case addition
         case number(Int)
         case lp
         case rp
-        
+        case empty
     }
     
-    func tokenezer(formula:[Character]) -> [token] {
-        var formulaInToken = [token]()
-        
+    func tokenize(formula: [Character]) -> [Token] {
+        var tokens = [Token]()
+        var numberBufer = ""
         for index in 0 ..< formula.count {
             let symbol = String(formula[index])
-            
-            if let symbolToInt = Int(symbol) {
-                formulaInToken.append(.number(symbolToInt))
+            if let _ = Int(symbol) {
+                numberBufer += symbol
             } else {
+                if !numberBufer.isEmpty {
+                    tokens.append(.number(Int(numberBufer)!))
+                    numberBufer = ""
+                }
+                
                 switch symbol {
                 case"(":
-                    formulaInToken.append(.lp)
+                        tokens.append(.lp)
                 case")":
-                    formulaInToken.append(.rp)
+                        tokens.append(.rp)
                 case"*":
-                    formulaInToken.append(.multiplication)
+                    tokens.append(.multiplication)
                 case"+":
-                    formulaInToken.append(.addition)
+                    tokens.append(.addition)
+                case"=":
+                    continue
+                case" ":
+                    continue
                 default:
                     continue
                 }
             }
         }
-        return formulaInToken
-    }
-    
-    private func addtokenInString(symbolInInt:Int, befor:String) -> Value {
-        var beforOperator = befor
-        if befor.isEmpty {
-            beforOperator = "\(symbolInInt)"
-            return beforOperator
-        } else {
-            beforOperator += "\(symbolInInt)"
-            return beforOperator
+        
+        if !numberBufer.isEmpty {
+            tokens.append(.number(Int(numberBufer)!))
         }
+        
+        return tokens
     }
     
     // MARK: - Evaluate
-    
-    private func evaluate(formula:[token]) -> Value {
-        var beforOperator = ""
-        var afterOperator = ""
+    private func evaluate(formula:[Token]) -> Value {
+        var beforOperator: Token = .empty
+        var afterOperator: Token = .empty
         
-        var lastOperator : token?
+        var lastOperator: Token = .empty
         
         for index in 0 ..< formula.count {
-            let symbol = formula[index]
+            let token = formula[index]
             
             if index != formula.count - 1 {
-                switch symbol {
+                switch token {
                 case .multiplication:
-                    if lastOperator != nil  {
-                        afterOperator = operation(lastOperator: lastOperator!, beforOperator: beforOperator, afterOperator: afterOperator)
-                    } else {
-                        afterOperator = afterOperatorMultiplication(afterOperator: afterOperator, beforOperator: beforOperator)
-                    }
-                    beforOperator = ""
+                   afterOperator = needNameForFuncHelpPLZ(tokens: (beforOperator,afterOperator), lastOperation: lastOperator)
+                    beforOperator = .empty
                     lastOperator = .multiplication
                 case .addition:
-                    if lastOperator != nil  {
-                       afterOperator = operation(lastOperator: lastOperator!, beforOperator: beforOperator, afterOperator: afterOperator)
-                    } else {
-                        afterOperator = afterOperatorAddition(afterOperator: afterOperator, beforOperator: beforOperator)
-                    }
-                    beforOperator = ""
+                    afterOperator = needNameForFuncHelpPLZ(tokens: (beforOperator,afterOperator), lastOperation: lastOperator)
+                    beforOperator = .empty
                     lastOperator = .addition
-                case .number(let number):
-                    beforOperator = addtokenInString(symbolInInt: number, befor: beforOperator)
+                case .number(_):
+                    beforOperator = token
                 case .lp:
                     continue
                 case .rp:
                     continue
+                case .empty:
+                    continue
                 }
             } else {
-                switch symbol {
-                case .number(let number):
-                    beforOperator = addtokenInString(symbolInInt: number, befor: beforOperator)
-                    
-                    if afterOperator.isEmpty {
-                        return beforOperator
-                    } else {
-                        return operation(lastOperator: lastOperator!, beforOperator: beforOperator, afterOperator: afterOperator)
-                    }
+                switch token {
+                case .number(_):
+                    beforOperator = token
+                    return convertTokenToValue(token: needNameForFuncHelpPLZ(tokens: (beforOperator,afterOperator), lastOperation: lastOperator))
                 default:
-                    if beforOperator.isEmpty {
-                        return afterOperator
-                    } else {
-                        if lastOperator != nil {
-                            return operation(lastOperator: lastOperator!, beforOperator: beforOperator, afterOperator: afterOperator)
-                            
-                        } else {
-                            return beforOperator
-                        }
-                    }
+                    
+                    return convertTokenToValue(token: needNameForFuncHelpPLZ(tokens: (beforOperator,afterOperator), lastOperation: lastOperator))
                 }
             }
+        }
+        return ""
+    }
+    // MARK: - New evaluet logic
+    private func operation(tokens:(Token,Token), tokenOperator: Token) -> Token {
+        
+        if case let .number(first) = tokens.0, case let .number(second) = tokens.1 {
             
+            switch tokenOperator {
+            case .multiplication:
+                return .number(first * second)
+            case .addition:
+                return .number(first + second)
+            default:
+                assertionFailure("TokenOperator return wrong token !")
+            }
+        } else {
+            assertionFailure("Tokens return NOT .number !")
+        }
+        assertionFailure("Tokens return NOT .number !")
+        return .empty
+    }
+    
+    private func convertTokenToValue(token: Token) -> Value {
+        if case let .number(numberToReturn) = token {
+            switch token {
+            case .number(numberToReturn):
+                return Value (numberToReturn)
+            case .empty:
+                return ""
+            default:
+                assertionFailure("Wrong Token")
+            }
         }
         return ""
     }
     
-    // MARK: - evaluateLogic
-    
-    private func afterOperatorMultiplication(afterOperator:Value, beforOperator:Value) -> Value {
-        if afterOperator.isEmpty {
-            return beforOperator
-        } else {
-            return operatorMultiplication(first: beforOperator, second: afterOperator)
-        }
-    }
-    
-    private func afterOperatorAddition(afterOperator:Value, beforOperator:Value) -> Value {
-        if afterOperator.isEmpty {
-            return beforOperator
-        } else {
-            return operatorAddition(first: beforOperator, second: afterOperator)
-        }
-    }
-    
-    private func operatorAddition(first:Value, second:Value) -> Value {
-        guard let beforTriger = Int(first), let afterTriger = Int(second) else {
-            return ""
-        }
-        return Value(beforTriger + afterTriger)
-    }
-    
-    private func operatorMultiplication(first:Value, second:Value) -> Value {
-        guard let beforTriger = Int(first), let afterTriger = Int(second) else {
-            return ""
-        }
-        return Value(beforTriger * afterTriger)
-    }
-    
-    
-    
-    private func operation(lastOperator:token, beforOperator:Value, afterOperator:Value) -> Value {
-        switch lastOperator {
-        case .multiplication:
-            return operatorMultiplication(first: beforOperator, second: afterOperator)
-        case .addition:
-            return operatorAddition(first: beforOperator, second: afterOperator)
+    private func isItEmpty(token: Token) -> Bool {
+        switch token {
+        case .empty:
+            return true
         default:
-            assertionFailure()
+            return false
         }
-        return ""
     }
-    
-    
-    
+
+    private func needNameForFuncHelpPLZ(tokens inBufer:(Token,Token), lastOperation operatorToUse:Token) -> Token {
+        if isItEmpty(token: inBufer.1)  {
+            return  inBufer.0
+        } else {
+            if isItEmpty(token: operatorToUse)  {
+                assertionFailure("Operator can't be .empty if afterOperator isn't!")
+                return .empty
+            } else {
+                return  operation(tokens: (inBufer.0,inBufer.1), tokenOperator: operatorToUse)
+            }
+        }
+    }
 }
