@@ -110,11 +110,11 @@ class Sheet  {
             if index != formula.count - 1 {
                 switch token {
                 case .multiplication:
-                   afterOperator = needNameForFuncHelpPLZ(tokens: (beforOperator,afterOperator), lastOperation: lastOperator)
+                   afterOperator = whatTokenReturn(tokens: (beforOperator,afterOperator), lastOperation: lastOperator)
                     beforOperator = .empty
                     lastOperator = .multiplication
                 case .addition:
-                    afterOperator = needNameForFuncHelpPLZ(tokens: (beforOperator,afterOperator), lastOperation: lastOperator)
+                    afterOperator = whatTokenReturn(tokens: (beforOperator,afterOperator), lastOperation: lastOperator)
                     beforOperator = .empty
                     lastOperator = .addition
                 case .number(_):
@@ -130,16 +130,16 @@ class Sheet  {
                 switch token {
                 case .number(_):
                     beforOperator = token
-                    return convertTokenToValue(token: needNameForFuncHelpPLZ(tokens: (beforOperator,afterOperator), lastOperation: lastOperator))
+                    return convertTokenToValue(token: whatTokenReturn(tokens: (beforOperator,afterOperator), lastOperation: lastOperator))
                 default:
                     
-                    return convertTokenToValue(token: needNameForFuncHelpPLZ(tokens: (beforOperator,afterOperator), lastOperation: lastOperator))
+                    return convertTokenToValue(token: whatTokenReturn(tokens: (beforOperator,afterOperator), lastOperation: lastOperator))
                 }
             }
         }
         return ""
     }
-    // MARK: - New evaluet logic
+    // MARK: -  evaluet logic
     private func operation(tokens:(Token,Token), tokenOperator: Token) -> Token {
         
         if case let .number(first) = tokens.0, case let .number(second) = tokens.1 {
@@ -182,7 +182,7 @@ class Sheet  {
         }
     }
 
-    private func needNameForFuncHelpPLZ(tokens inBufer:(Token,Token), lastOperation operatorToUse:Token) -> Token {
+    private func whatTokenReturn(tokens inBufer:(Token,Token), lastOperation operatorToUse:Token) -> Token {
         if isItEmpty(token: inBufer.1)  {
             return  inBufer.0
         } else {
@@ -194,4 +194,7 @@ class Sheet  {
             }
         }
     }
+    
+    
+    //
 }

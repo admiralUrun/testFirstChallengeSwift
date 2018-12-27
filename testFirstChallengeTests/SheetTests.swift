@@ -131,8 +131,8 @@ class SheetTests: XCTestCase {
     
     func testOperationPrecedence() {
         let testSheep = Sheet()
-        testSheep.put("A1", "=1+2*3")
-        XCTAssertEqual("9", testSheep.get("A1"))
+        testSheep.put("A1", "=7+2*3")
+        XCTAssertEqual("13", testSheep.get("A1"))
     }
     
 }
