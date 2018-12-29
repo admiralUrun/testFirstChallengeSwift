@@ -13,7 +13,7 @@ class Sheet  {
     typealias Address = String
     typealias Value = String
     
-    private var cells:[Address : String] = [:]
+    private var cells:[Address : Value] = [:]
     
     func get(_ key: Address) -> String {
         guard let value = cells[key] else {
@@ -99,6 +99,8 @@ class Sheet  {
     
     // MARK: - Evaluate
     private func evaluate(formula:[Token]) -> Value {
+        
+        var ifFormulaHaveMultiplication = [Token]()
         var beforOperator: Token = .empty
         var afterOperator: Token = .empty
         
@@ -106,8 +108,50 @@ class Sheet  {
         
         for index in 0 ..< formula.count {
             let token = formula[index]
+            switch token {
+            case .multiplication:
+                if ifFormulaHaveMultiplication.isEmpty {
+                   assertionFailure(".multiplication can't be first in Array !!!")
+                } else {
+                    beforOperator = ifFormulaHaveMultiplication[ifFormulaHaveMultiplication.count - 1]
+                    afterOperator = formula[index + 1]
+                    ifFormulaHaveMultiplication.remove(at: ifFormulaHaveMultiplication.count - 1)
+                    ifFormulaHaveMultiplication.append(operation(tokens: (beforOperator,afterOperator), tokenOperator: .multiplication))
+                    beforOperator = .empty
+                    afterOperator = .empty
+                }
+            case .rp:
+                ifFormulaHaveMultiplication.append(token)
+            case .lp:
+                ifFormulaHaveMultiplication.append(token)
+            case .addition:
+                ifFormulaHaveMultiplication.append(token)
+            case .number(_):
+                if ifFormulaHaveMultiplication.isEmpty {
+                    ifFormulaHaveMultiplication.append(token)
+                } else {
+                    beforOperator = ifFormulaHaveMultiplication[ifFormulaHaveMultiplication.count - 1]
+                    if case .number(_) = beforOperator {
+                        continue
+                    } else {
+                        ifFormulaHaveMultiplication.append(token)
+                    }
+                }
+                
+            default:
+                print(" -_–' ")
+                continue
+            }
+        }
+        
+        if ifFormulaHaveMultiplication.count == 1 {
+            return convertTokenToValue(token: ifFormulaHaveMultiplication[0])
+        }
+        
+        for index in 0 ..< ifFormulaHaveMultiplication.count {
+            let token = ifFormulaHaveMultiplication[index]
             
-            if index != formula.count - 1 {
+            if index != ifFormulaHaveMultiplication.count - 1 {
                 switch token {
                 case .multiplication:
                    afterOperator = whatTokenReturn(tokens: (beforOperator,afterOperator), lastOperation: lastOperator)
@@ -194,7 +238,4 @@ class Sheet  {
             }
         }
     }
-    
-    
-    //
 }

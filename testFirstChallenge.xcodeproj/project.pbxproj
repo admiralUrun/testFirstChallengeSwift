@@ -100,13 +100,13 @@
 		95B7352621C82CA6004C12A7 /* testFirstChallenge */ = {
 			isa = PBXGroup;
 			children = (
+				95824E6921C94ED200F40795 /* MyPlayground.playground */,
 				95B7352721C82CA6004C12A7 /* AppDelegate.swift */,
 				95B7352921C82CA6004C12A7 /* ViewController.swift */,
 				95B7352B21C82CA6004C12A7 /* Main.storyboard */,
 				95B7352E21C82CA6004C12A7 /* Assets.xcassets */,
 				95B7353021C82CA6004C12A7 /* LaunchScreen.storyboard */,
 				95B7355521C82CEF004C12A7 /* Sheet.swift */,
-				95824E6921C94ED200F40795 /* MyPlayground.playground */,
 				95B7353321C82CA6004C12A7 /* Info.plist */,
 			);
 			path = testFirstChallenge;

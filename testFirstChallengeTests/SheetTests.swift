@@ -135,4 +135,10 @@ class SheetTests: XCTestCase {
         XCTAssertEqual("13", testSheep.get("A1"))
     }
     
+//    func testFullExpression() {
+//        let testSheep = Sheet()
+//        testSheep.put("A1", "=7*(2+3)*((((2+1))))")
+//        XCTAssertEqual("105", testSheep.get("A1"))
+//    }
+//    
 }
