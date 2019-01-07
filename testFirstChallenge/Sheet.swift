@@ -13,6 +13,9 @@ class Sheet  {
     typealias Address = String
     typealias Value = String
     
+    var tokens = [Token]()
+    var tokenIndex = 0
+    
     private var cells:[Address : Value] = [:]
     
     func get(_ key: Address) -> String {
@@ -31,7 +34,8 @@ class Sheet  {
         }
         
         if value.first == "=" {
-            return evaluate(formula: tokenize(formula: Array(value)))
+            tokens = tokenize(formula: Array(value))
+            return String(evalExpression())
         }
         return value
     }
@@ -55,7 +59,6 @@ class Sheet  {
         case number(Int)
         case lp
         case rp
-        case empty
     }
     
     func tokenize(formula: [Character]) -> [Token] {
@@ -73,9 +76,9 @@ class Sheet  {
                 
                 switch symbol {
                 case"(":
-                        tokens.append(.lp)
+                    tokens.append(.lp)
                 case")":
-                        tokens.append(.rp)
+                    tokens.append(.rp)
                 case"*":
                     tokens.append(.multiplication)
                 case"+":
@@ -98,144 +101,101 @@ class Sheet  {
     }
     
     // MARK: - Evaluate
-    private func evaluate(formula:[Token]) -> Value {
+    
+    private func evalExpression() -> Int {
+        let left = evalTerm()
         
-        var ifFormulaHaveMultiplication = [Token]()
-        var beforOperator: Token = .empty
-        var afterOperator: Token = .empty
+        if let token = nextTokenAndMove() {
+            if let nextToken = nextToken() {
+                switch nextToken {
+                case .addition:
+                    break
+                case .multiplication:
+                    break
+                case .number(_):
+                    break
+                case .rp:
+                    return left
+                default:
+                    return left
+                }
+            }
+            switch token {
+            case .addition:
+                return left + evalExpression()
+            default:
+                preconditionFailure("Unexpected token: \(token)")
+            }
+        } else {
+            return left
+        }
+    }
+    
+    private func evalTerm() -> Int {
+        let left = evalPrimary()
         
-        var lastOperator: Token = .empty
-        
-        for index in 0 ..< formula.count {
-            let token = formula[index]
+        if let token = nextTokenAndMove() {
+            if let nextToken = nextToken() {
+                switch nextToken {
+                case .multiplication:
+                    break
+                default:
+                    return left
+                }
+            }
             switch token {
             case .multiplication:
-                if ifFormulaHaveMultiplication.isEmpty {
-                   assertionFailure(".multiplication can't be first in Array !!!")
-                } else {
-                    beforOperator = ifFormulaHaveMultiplication[ifFormulaHaveMultiplication.count - 1]
-                    afterOperator = formula[index + 1]
-                    ifFormulaHaveMultiplication.remove(at: ifFormulaHaveMultiplication.count - 1)
-                    ifFormulaHaveMultiplication.append(operation(tokens: (beforOperator,afterOperator), tokenOperator: .multiplication))
-                    beforOperator = .empty
-                    afterOperator = .empty
-                }
-            case .rp:
-                ifFormulaHaveMultiplication.append(token)
-            case .lp:
-                ifFormulaHaveMultiplication.append(token)
-            case .addition:
-                ifFormulaHaveMultiplication.append(token)
-            case .number(_):
-                if ifFormulaHaveMultiplication.isEmpty {
-                    ifFormulaHaveMultiplication.append(token)
-                } else {
-                    beforOperator = ifFormulaHaveMultiplication[ifFormulaHaveMultiplication.count - 1]
-                    if case .number(_) = beforOperator {
-                        continue
-                    } else {
-                        ifFormulaHaveMultiplication.append(token)
-                    }
-                }
+                return left * evalTerm()
                 
             default:
-                print(" -_–' ")
-                continue
-            }
-        }
-        
-        if ifFormulaHaveMultiplication.count == 1 {
-            return convertTokenToValue(token: ifFormulaHaveMultiplication[0])
-        }
-        
-        for index in 0 ..< ifFormulaHaveMultiplication.count {
-            let token = ifFormulaHaveMultiplication[index]
-            
-            if index != ifFormulaHaveMultiplication.count - 1 {
-                switch token {
-                case .multiplication:
-                   afterOperator = whatTokenReturn(tokens: (beforOperator,afterOperator), lastOperation: lastOperator)
-                    beforOperator = .empty
-                    lastOperator = .multiplication
-                case .addition:
-                    afterOperator = whatTokenReturn(tokens: (beforOperator,afterOperator), lastOperation: lastOperator)
-                    beforOperator = .empty
-                    lastOperator = .addition
-                case .number(_):
-                    beforOperator = token
-                case .lp:
-                    continue
-                case .rp:
-                    continue
-                case .empty:
-                    continue
-                }
-            } else {
-                switch token {
-                case .number(_):
-                    beforOperator = token
-                    return convertTokenToValue(token: whatTokenReturn(tokens: (beforOperator,afterOperator), lastOperation: lastOperator))
-                default:
-                    
-                    return convertTokenToValue(token: whatTokenReturn(tokens: (beforOperator,afterOperator), lastOperation: lastOperator))
-                }
-            }
-        }
-        return ""
-    }
-    // MARK: -  evaluet logic
-    private func operation(tokens:(Token,Token), tokenOperator: Token) -> Token {
-        
-        if case let .number(first) = tokens.0, case let .number(second) = tokens.1 {
-            
-            switch tokenOperator {
-            case .multiplication:
-                return .number(first * second)
-            case .addition:
-                return .number(first + second)
-            default:
-                assertionFailure("TokenOperator return wrong token !")
+                preconditionFailure("Unexpected token: \(token)")
             }
         } else {
-            assertionFailure("Tokens return NOT .number !")
+            return left
         }
-        assertionFailure("Tokens return NOT .number !")
-        return .empty
     }
     
-    private func convertTokenToValue(token: Token) -> Value {
-        if case let .number(numberToReturn) = token {
+    private func evalPrimary() -> Int {
+        if let token = nextToken() {
             switch token {
-            case .number(numberToReturn):
-                return Value (numberToReturn)
-            case .empty:
-                return ""
+            case .lp:
+                let expression = evalExpression()
+                // TODO: assert that it's .rp
+               // let _ = nextTokenAndMove()
+                return expression
+                
+            case .number(let number):
+                return number
+                
             default:
-                assertionFailure("Wrong Token")
+                preconditionFailure("Unexpected token: \(token)")
             }
-        }
-        return ""
+        } else {
+            switch tokens[tokenIndex] {
+            case .number(let number):
+                return number
+                
+            default:
+                preconditionFailure("Unexpected token: \(tokens[tokenIndex])")
+            }        }
     }
     
-    private func isItEmpty(token: Token) -> Bool {
-        switch token {
-        case .empty:
-            return true
-        default:
-            return false
+    private func nextTokenAndMove() -> Token? {
+        if tokenIndex + 1 < tokens.count {
+            let token = tokens[tokenIndex]
+            tokenIndex += 1
+            return token
         }
+        return .none
     }
-
-    private func whatTokenReturn(tokens inBufer:(Token,Token), lastOperation operatorToUse:Token) -> Token {
-        if isItEmpty(token: inBufer.1)  {
-            return  inBufer.0
-        } else {
-            if isItEmpty(token: operatorToUse)  {
-                assertionFailure("Operator can't be .empty if afterOperator isn't!")
-                return .empty
-            } else {
-                return  operation(tokens: (inBufer.0,inBufer.1), tokenOperator: operatorToUse)
-            }
+    
+    private func nextToken() -> Token? {
+        if tokenIndex + 1 < tokens.count {
+            let token = tokens[tokenIndex]
+            return token
         }
+        return .none
     }
+    
+    
 }

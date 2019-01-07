@@ -14,6 +14,7 @@
 		95B7353221C82CA6004C12A7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 95B7353021C82CA6004C12A7 /* LaunchScreen.storyboard */; };
 		95B7354821C82CA6004C12A7 /* testFirstChallengeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95B7354721C82CA6004C12A7 /* testFirstChallengeUITests.swift */; };
 		95B7355721C82D26004C12A7 /* Sheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95B7355521C82CEF004C12A7 /* Sheet.swift */; };
+		95CC321A21D7896A00C15F96 /* Grammar.md in Resources */ = {isa = PBXBuildFile; fileRef = 95CC321921D7896A00C15F96 /* Grammar.md */; };
 		95DDF24421CACB1D007A5E75 /* SheetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95DDF24221CACABC007A5E75 /* SheetTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -49,6 +50,7 @@
 		95B7354721C82CA6004C12A7 /* testFirstChallengeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testFirstChallengeUITests.swift; sourceTree = "<group>"; };
 		95B7354921C82CA6004C12A7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		95B7355521C82CEF004C12A7 /* Sheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sheet.swift; sourceTree = "<group>"; };
+		95CC321921D7896A00C15F96 /* Grammar.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Grammar.md; sourceTree = SOURCE_ROOT; };
 		95DDF24221CACABC007A5E75 /* SheetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -107,6 +109,7 @@
 				95B7352E21C82CA6004C12A7 /* Assets.xcassets */,
 				95B7353021C82CA6004C12A7 /* LaunchScreen.storyboard */,
 				95B7355521C82CEF004C12A7 /* Sheet.swift */,
+				95CC321921D7896A00C15F96 /* Grammar.md */,
 				95B7353321C82CA6004C12A7 /* Info.plist */,
 			);
 			path = testFirstChallenge;
@@ -237,6 +240,7 @@
 				95B7353221C82CA6004C12A7 /* LaunchScreen.storyboard in Resources */,
 				95B7352F21C82CA6004C12A7 /* Assets.xcassets in Resources */,
 				95B7352D21C82CA6004C12A7 /* Main.storyboard in Resources */,
+				95CC321A21D7896A00C15F96 /* Grammar.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
