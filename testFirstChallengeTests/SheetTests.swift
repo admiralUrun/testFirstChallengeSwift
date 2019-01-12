@@ -114,8 +114,7 @@ class SheetTests: XCTestCase {
         let testSheet = Sheet()
         testSheet.put("A1", "=((((10))))")
         XCTAssertEqual("10", testSheet.get("A1"))
-            
-        }
+    }
     
     func testMultiply() {
         let testSheep = Sheet()

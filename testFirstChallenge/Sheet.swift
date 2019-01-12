@@ -105,26 +105,14 @@ class Sheet  {
     private func evalExpression() -> Int {
         let left = evalTerm()
         
-        if let token = nextTokenAndMove() {
-            if let nextToken = nextToken() {
-                switch nextToken {
-                case .addition:
-                    break
-                case .multiplication:
-                    break
-                case .number(_):
-                    break
-                case .rp:
-                    return left
-                default:
-                    return left
-                }
-            }
+        if let token = getToken() {
             switch token {
             case .addition:
+                let _ = getTokenAndAdvance()
                 return left + evalExpression()
+                
             default:
-                preconditionFailure("Unexpected token: \(token)")
+                return left
             }
         } else {
             return left
@@ -134,130 +122,56 @@ class Sheet  {
     private func evalTerm() -> Int {
         let left = evalPrimary()
         
-        if let token = nextTokenAndMove() {
-            if let nextToken = nextToken() {
-                switch nextToken {
-                case .multiplication:
-                    break
-                case .number(_):
-                    break
-                case .lp:
-                    break
-                default:
-                    return left
-                }
-            } else {
-                if expetionToken(token: tokens[tokenIndex], expected: .rp) {
-                    return left
-                }
-            }
+        if let token = getToken() {
             switch token {
             case .multiplication:
+                let _ = getTokenAndAdvance()
                 return left * evalTerm()
                 
             default:
-                preconditionFailure("Unexpected token: \(token)")
+                return left
             }
         } else {
             return left
         }
     }
     
-    private func evalExpressionInParentheses() -> Int {
-        tokenIndex += 1
-        let left = evalExpression()
-        tokenIndex += 1
-        return left
-    }
-    
     private func evalPrimary() -> Int {
-        if let token = nextToken() {
+        if let token = getToken() {
             switch token {
             case .lp:
-                let expression = evalExpressionInParentheses()
+                let _ = getTokenAndAdvance()
+                let expression = evalExpression()
                 // TODO: assert that it's .rp
-                // let _ = nextTokenAndMove()
+                let _ = getTokenAndAdvance()
                 return expression
                 
             case .number(let number):
+                let _ = getTokenAndAdvance()
                 return number
+                
             default:
                 preconditionFailure("Unexpected token: \(token)")
             }
         } else {
-            switch tokens[tokenIndex] {
-            case .number(let number):
-                return number
-                
-            default:
-                preconditionFailure("Unexpected token: \(tokens[tokenIndex])")
-            }        }
+            preconditionFailure("Expected primary")
+        }
     }
     
-    private func nextTokenAndMove() -> Token? {
-        if tokenIndex + 1 < tokens.count {
-            let token: Token
-            if expetionToken(token: tokens[tokenIndex + 1], expected: .multiplication) {
-                tokenIndex += 1
-                token = tokens[tokenIndex]
-                tokenIndex += 1
-            } else {
-                token = tokens[tokenIndex]
-                tokenIndex += 1
-            }
+    private func getTokenAndAdvance() -> Token? {
+        if tokenIndex < tokens.count {
+            let token = tokens[tokenIndex]
+            tokenIndex += 1
             return token
         }
         return .none
     }
     
-    private func nextToken() -> Token? {
-        if tokenIndex + 1 < tokens.count {
+    private func getToken() -> Token? {
+        if tokenIndex < tokens.count {
             let token = tokens[tokenIndex]
             return token
         }
         return .none
     }
-    
-    private func expetionToken(token: Token, expected: Token) -> Bool {
-        switch expected {
-        case .rp:
-            switch token {
-            case .rp:
-                return true
-            default:
-                return false
-            }
-        case .addition:
-            switch token {
-            case .addition:
-                return true
-            default:
-                return false
-            }
-        case .multiplication:
-            switch token {
-            case .multiplication:
-                return true
-            default:
-                return false
-            }
-        case .number(_):
-            switch token {
-            case .number(_):
-                return true
-            default:
-                return false
-            }
-        case .lp:
-            switch token {
-            case .lp:
-                return true
-            default:
-                return false
-            }
-        }
-    }
-    
-    
-    
 }
