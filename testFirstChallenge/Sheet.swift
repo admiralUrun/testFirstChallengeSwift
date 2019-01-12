@@ -139,7 +139,15 @@ class Sheet  {
                 switch nextToken {
                 case .multiplication:
                     break
+                case .number(_):
+                    break
+                case .lp:
+                    break
                 default:
+                    return left
+                }
+            } else {
+                if expetionToken(token: tokens[tokenIndex], expected: .rp) {
                     return left
                 }
             }
@@ -155,18 +163,24 @@ class Sheet  {
         }
     }
     
+    private func evalExpressionInParentheses() -> Int {
+        tokenIndex += 1
+        let left = evalExpression()
+        tokenIndex += 1
+        return left
+    }
+    
     private func evalPrimary() -> Int {
         if let token = nextToken() {
             switch token {
             case .lp:
-                let expression = evalExpression()
+                let expression = evalExpressionInParentheses()
                 // TODO: assert that it's .rp
-               // let _ = nextTokenAndMove()
+                // let _ = nextTokenAndMove()
                 return expression
                 
             case .number(let number):
                 return number
-                
             default:
                 preconditionFailure("Unexpected token: \(token)")
             }
@@ -182,8 +196,15 @@ class Sheet  {
     
     private func nextTokenAndMove() -> Token? {
         if tokenIndex + 1 < tokens.count {
-            let token = tokens[tokenIndex]
-            tokenIndex += 1
+            let token: Token
+            if expetionToken(token: tokens[tokenIndex + 1], expected: .multiplication) {
+                tokenIndex += 1
+                token = tokens[tokenIndex]
+                tokenIndex += 1
+            } else {
+                token = tokens[tokenIndex]
+                tokenIndex += 1
+            }
             return token
         }
         return .none
@@ -196,6 +217,47 @@ class Sheet  {
         }
         return .none
     }
+    
+    private func expetionToken(token: Token, expected: Token) -> Bool {
+        switch expected {
+        case .rp:
+            switch token {
+            case .rp:
+                return true
+            default:
+                return false
+            }
+        case .addition:
+            switch token {
+            case .addition:
+                return true
+            default:
+                return false
+            }
+        case .multiplication:
+            switch token {
+            case .multiplication:
+                return true
+            default:
+                return false
+            }
+        case .number(_):
+            switch token {
+            case .number(_):
+                return true
+            default:
+                return false
+            }
+        case .lp:
+            switch token {
+            case .lp:
+                return true
+            default:
+                return false
+            }
+        }
+    }
+    
     
     
 }
