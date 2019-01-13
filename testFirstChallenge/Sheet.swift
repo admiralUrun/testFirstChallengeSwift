@@ -35,7 +35,12 @@ class Sheet  {
         
         if value.first == "=" {
             tokens = tokenize(formula: Array(value))
-            return String(evalExpression())
+            
+            if let number = evalExpression() {
+             return String(number)
+            } else {
+                return "#Error"
+            }
         }
         return value
     }
@@ -102,41 +107,50 @@ class Sheet  {
     
     // MARK: - Evaluate
     
-    private func evalExpression() -> Int {
-        let left = evalTerm()
-        
-        if let token = getToken() {
-            switch token {
-            case .addition:
-                 getAdvance()
-                return left + evalExpression()
-                
-            default:
+    private func evalExpression() -> Int? {
+        if  let left = evalTerm() {
+            if let token = getToken() {
+                switch token {
+                case .addition:
+                    getAdvance()
+                    if let right = evalExpression() {
+                     return left + right
+                    }
+                default:
+                    return left
+                }
+            } else {
                 return left
             }
         } else {
-            return left
+            return nil
         }
+       preconditionFailure("Unexpected token")
     }
     
-    private func evalTerm() -> Int {
-        let left = evalPrimary()
-        
-        if let token = getToken() {
-            switch token {
-            case .multiplication:
-                 getAdvance()
-                return left * evalTerm()
-                
-            default:
+    private func evalTerm() -> Int? {
+        if let left = evalPrimary() {
+            if let token = getToken() {
+                switch token {
+                case .multiplication:
+                    getAdvance()
+                    if let right = evalTerm() {
+                     return left * right
+                    } else {
+                        return nil
+                    }
+                default:
+                    return left
+                }
+            } else {
                 return left
             }
         } else {
-            return left
+            return nil
         }
     }
     
-    private func evalPrimary() -> Int {
+    private func evalPrimary() -> Int? {
         if let token = getToken() {
             switch token {
             case .lp:
@@ -153,7 +167,7 @@ class Sheet  {
                 preconditionFailure("Unexpected token: \(token)")
             }
         } else {
-            preconditionFailure("Expected primary")
+            return nil
         }
     }
     

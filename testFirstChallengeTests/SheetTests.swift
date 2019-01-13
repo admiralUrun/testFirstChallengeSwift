@@ -146,5 +146,10 @@ class SheetTests: XCTestCase {
         XCTAssertEqual("#Error", testSheep.get("A1"))
     }
     
+    func testParenthesisError() {
+        let testSheep = Sheet()
+        testSheep.put("A1", "=(((((7))")
+        XCTAssertEqual("#Error", testSheep.get("A1"))
+    }
     
 }
