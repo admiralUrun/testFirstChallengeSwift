@@ -140,4 +140,11 @@ class SheetTests: XCTestCase {
         XCTAssertEqual("105", testSheep.get("A1"))
     }
 
+    func testSimpleFormulaError() {
+        let testSheep = Sheet()
+        testSheep.put("A1", "=7*")
+        XCTAssertEqual("#Error", testSheep.get("A1"))
+    }
+    
+    
 }

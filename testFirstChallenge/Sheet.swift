@@ -108,7 +108,7 @@ class Sheet  {
         if let token = getToken() {
             switch token {
             case .addition:
-                let _ = getTokenAndAdvance()
+                 getAdvance()
                 return left + evalExpression()
                 
             default:
@@ -125,7 +125,7 @@ class Sheet  {
         if let token = getToken() {
             switch token {
             case .multiplication:
-                let _ = getTokenAndAdvance()
+                 getAdvance()
                 return left * evalTerm()
                 
             default:
@@ -140,14 +140,13 @@ class Sheet  {
         if let token = getToken() {
             switch token {
             case .lp:
-                let _ = getTokenAndAdvance()
+                 getAdvance()
                 let expression = evalExpression()
-                // TODO: assert that it's .rp
-                let _ = getTokenAndAdvance()
+                 getAdvance()
                 return expression
                 
             case .number(let number):
-                let _ = getTokenAndAdvance()
+                 getAdvance()
                 return number
                 
             default:
@@ -158,13 +157,8 @@ class Sheet  {
         }
     }
     
-    private func getTokenAndAdvance() -> Token? {
-        if tokenIndex < tokens.count {
-            let token = tokens[tokenIndex]
+    private func getAdvance()  {
             tokenIndex += 1
-            return token
-        }
-        return .none
     }
     
     private func getToken() -> Token? {
