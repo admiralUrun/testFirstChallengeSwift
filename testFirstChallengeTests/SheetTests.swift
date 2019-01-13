@@ -14,6 +14,7 @@ class SheetTests: XCTestCase {
     override func setUp() {
         
     }
+    // MARK: - Part 1
     
     func testThatCellsAreEmptyByDefault() {
         let testSheet = Sheet()
@@ -87,6 +88,7 @@ class SheetTests: XCTestCase {
         testSheet.put(theCell, "=7")
         XCTAssertEqual("=7", testSheet.getLiteral(theCell))
     }
+    // MARK: - Part 2
     
     func testFormulaSpec() {
         let testSheet = Sheet()
@@ -152,5 +154,13 @@ class SheetTests: XCTestCase {
         XCTAssertEqual("#Error", testSheep.get("A1"))
     }
     
+    // MARK: - Part 3
     
+//    func testThatCellReferenceWorks() {
+//        let testSheep = Sheet()
+//        testSheep.put("A1", "8")
+//        testSheep.put("A2", "=A1")
+//        XCTAssertEqual("8", testSheep.get("A2"))
+//    }
+//    
 }

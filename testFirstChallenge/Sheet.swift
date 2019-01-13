@@ -12,6 +12,7 @@ class Sheet  {
     
     typealias Address = String
     typealias Value = String
+    typealias Number = Int
     
     var tokens = [Token]()
     var tokenIndex = 0
@@ -35,14 +36,12 @@ class Sheet  {
         
         if value.first == "=" {
             tokens = tokenize(formula: Array(value))
-            
             if let number = evalExpression() {
                 if tokenIndex <= tokens.count {
                     return String(number)
                 } else {
                     return "#Error"
                 }
-//             return String(number)
             } else {
                 return "#Error"
             }
@@ -69,57 +68,60 @@ class Sheet  {
         case number(Int)
         case lp
         case rp
+        case cell
     }
     
     func tokenize(formula: [Character]) -> [Token] {
         var tokens = [Token]()
         var numberBufer = ""
-        for index in 0 ..< formula.count {
-            let symbol = String(formula[index])
-            if let _ = Int(symbol) {
+        while tokenIndex < formula.count {
+            let symbol = String(formula[tokenIndex])
+            if let _ = Number(symbol) {
                 numberBufer += symbol
+                tokenIndex += 1
             } else {
                 if !numberBufer.isEmpty {
-                    tokens.append(.number(Int(numberBufer)!))
+                    tokens.append(.number(Number(numberBufer)!))
                     numberBufer = ""
                 }
                 
                 switch symbol {
                 case"(":
                     tokens.append(.lp)
+                    tokenIndex += 1
                 case")":
                     tokens.append(.rp)
+                    tokenIndex += 1
                 case"*":
                     tokens.append(.multiplication)
+                    tokenIndex += 1
                 case"+":
                     tokens.append(.addition)
-                case"=":
-                    continue
-                case" ":
-                    continue
+                    tokenIndex += 1
                 default:
+                    tokenIndex += 1
                     continue
                 }
             }
         }
         
         if !numberBufer.isEmpty {
-            tokens.append(.number(Int(numberBufer)!))
+            tokens.append(.number(Number(numberBufer)!))
         }
-        
+        tokenIndex = 0
         return tokens
     }
     
     // MARK: - Evaluate
     
-    private func evalExpression() -> Int? {
+    private func evalExpression() -> Number? {
         if  let left = evalTerm() {
             if let token = getToken() {
                 switch token {
                 case .addition:
                     getAdvance()
                     if let right = evalExpression() {
-                     return left + right
+                        return left + right
                     }
                 default:
                     return left
@@ -130,17 +132,17 @@ class Sheet  {
         } else {
             return nil
         } 
-       preconditionFailure("Unexpected token")
+        preconditionFailure("Unexpected token")
     }
     
-    private func evalTerm() -> Int? {
+    private func evalTerm() -> Number? {
         if let left = evalPrimary() {
             if let token = getToken() {
                 switch token {
                 case .multiplication:
                     getAdvance()
                     if let right = evalTerm() {
-                     return left * right
+                        return left * right
                     } else {
                         return nil
                     }
@@ -155,17 +157,17 @@ class Sheet  {
         }
     }
     
-    private func evalPrimary() -> Int? {
+    private func evalPrimary() -> Number? {
         if let token = getToken() {
             switch token {
             case .lp:
-                 getAdvance()
+                getAdvance()
                 let expression = evalExpression()
-                 getAdvance()
+                getAdvance()
                 return expression
                 
             case .number(let number):
-                 getAdvance()
+                getAdvance()
                 return number
                 
             default:
@@ -177,7 +179,7 @@ class Sheet  {
     }
     
     private func getAdvance()  {
-            tokenIndex += 1
+        tokenIndex += 1
     }
     
     private func getToken() -> Token? {
