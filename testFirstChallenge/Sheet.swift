@@ -37,7 +37,12 @@ class Sheet  {
             tokens = tokenize(formula: Array(value))
             
             if let number = evalExpression() {
-             return String(number)
+                if tokenIndex <= tokens.count {
+                    return String(number)
+                } else {
+                    return "#Error"
+                }
+//             return String(number)
             } else {
                 return "#Error"
             }
@@ -124,7 +129,7 @@ class Sheet  {
             }
         } else {
             return nil
-        }
+        } 
        preconditionFailure("Unexpected token")
     }
     
