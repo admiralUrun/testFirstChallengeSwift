@@ -211,6 +211,12 @@ class Sheet  {
                 primaryIterator.getAdvance()
                 return number
                 
+            case .cell(let adress):
+                    if let number = Number(get(adress)) {
+                     return number
+                    } else {
+                        return nil
+                    }
             default:
                 preconditionFailure("Unexpected token: \(token)")
             }

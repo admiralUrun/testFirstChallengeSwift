@@ -14,7 +14,6 @@ class Iterator {
     
     public var index = 0
     
-    
     public func next() -> Bool {
         return index < count
     }

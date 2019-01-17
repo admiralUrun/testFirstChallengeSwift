@@ -156,12 +156,33 @@ class SheetTests: XCTestCase {
     
     // MARK: - Part 3
     
-//    func testThatCellReferenceWorks() {
+    func testThatCellReferenceWorks() {
+        let testSheep = Sheet()
+        testSheep.put("A1", "8")
+        testSheep.put("A2", "=A1")
+        XCTAssertEqual("8", testSheep.get("A2"))
+    }
+    
+    func testThatCellChangesPropagate() {
+        let testSheep = Sheet()
+        testSheep.put("A1", "8")
+        testSheep.put("A2", "=A1")
+        XCTAssertEqual("8", testSheep.get("A2"))
+        
+        testSheep.put("A1", "9")
+        XCTAssertEqual("9", testSheep.get("A2"))
+    }
+    
+//    func testThatFormulasKnowCellsAndRecalculate() {
 //        let testSheep = Sheet()
 //        testSheep.put("A1", "8")
-//        testSheep.put("A2", "=A1")
-//        XCTAssertEqual("8", testSheep.get("A2"))
+//        testSheep.put("A2", "3")
+//        testSheep.put("B1", "=A1*(A1-A2)+A2/3")
+//        XCTAssertEqual("41", testSheep.get("B1"))
+//        
+//        testSheep.put("A2", "6")
+//        XCTAssertEqual("18", testSheep.get("B1"))
 //    }
 //    
-//    
+    
 }
