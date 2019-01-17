@@ -1,17 +1,20 @@
 # testFirstChallengeSwift/ Evaluate Grammar
 
-## expression
+## Expression
 
 expression ->  term | term + expression
 
-## term
+## Term
 
 term -> primary | primary * term 
 
-## primary
+## Primary
 
-primary -> number | ( expression )
+primary -> number | ( expression ) | addres
 
-## number
+## Number
 number ->  digit | digit number
 digit -> 0 | 1 | 2 | 3 | 5 | 6 | 7 | 8 | 9
+
+## Addres 
+addres -> digit | digit number | expession
