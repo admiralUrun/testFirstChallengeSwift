@@ -9,20 +9,20 @@
 import Foundation
 
 
-class Iterator {
+class Step {
+    init(put getCount:Int) {
+        count = getCount
+    }
+    
     private var count = 0
     
     public var index = 0
     
-    public func next() -> Bool {
+    public func hasNext() -> Bool {
         return index < count
     }
     
-    public func putCount(put arrayCount:Int) {
-        count = arrayCount
-    }
-    
-    public func getAdvance()  {
+    public func advance()  {
         index += 1
     }
 }

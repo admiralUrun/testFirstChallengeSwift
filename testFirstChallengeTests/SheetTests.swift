@@ -11,178 +11,193 @@ import XCTest
 
 class SheetTests: XCTestCase {
     
+    var sheet: Sheet!
+    
     override func setUp() {
-        
+        sheet = Sheet()
     }
+    
     // MARK: - Part 1
     
     func testThatCellsAreEmptyByDefault() {
-        let testSheet = Sheet()
-        
-        XCTAssertEqual("", testSheet.get("A1"))
-        XCTAssertEqual("", testSheet.get("ZX347"))
+        XCTAssertEqual("", sheet.get("A1"))
+        XCTAssertEqual("", sheet.get("ZX347"))
     }
     
     func testThatTextCellsAreStored() {
-        let testSheet = Sheet()
         let theCell = "A21"
         
-        testSheet.put(theCell, "A string")
-        XCTAssertEqual("A string", testSheet.get(theCell))
+        sheet.put(theCell, "A string")
+        XCTAssertEqual("A string", sheet.get(theCell))
         
-        testSheet.put(theCell, "A different string")
-        XCTAssertEqual("A different string", testSheet.get(theCell))
+        sheet.put(theCell, "A different string")
+        XCTAssertEqual("A different string", sheet.get(theCell))
         
-        testSheet.put(theCell, "")
-        XCTAssertEqual("", testSheet.get(theCell))
+        sheet.put(theCell, "")
+        XCTAssertEqual("", sheet.get(theCell))
     }
     
     func testThatManyCellsExist() {
-        let testSheet = Sheet()
+        sheet.put("A1", "First")
+        sheet.put("X27", "Second")
+        sheet.put("ZX901", "Third")
         
-        testSheet.put("A1", "First")
-        testSheet.put("X27", "Second")
-        testSheet.put("ZX901", "Third")
+        XCTAssertEqual("First", sheet.get("A1"), "A1")
+        XCTAssertEqual("Second", sheet.get("X27"), "X27")
+        XCTAssertEqual("Third", sheet.get("ZX901"), "ZX901")
         
-        XCTAssertEqual("First", testSheet.get("A1"), "A1")
-        XCTAssertEqual("Second", testSheet.get("X27"), "X27")
-        XCTAssertEqual("Third", testSheet.get("ZX901"), "ZX901")
+        sheet.put("A1", "Fourth")
         
-        testSheet.put("A1", "Fourth")
-        
-        XCTAssertEqual("Fourth", testSheet.get("A1"), "A1 after")
-        XCTAssertEqual("Second", testSheet.get("X27"), "same")
-        XCTAssertEqual("Third", testSheet.get("ZX901"), "same")
+        XCTAssertEqual("Fourth", sheet.get("A1"), "A1 after")
+        XCTAssertEqual("Second", sheet.get("X27"), "same")
+        XCTAssertEqual("Third", sheet.get("ZX901"), "same")
     }
     
     func testThatNumericCellsAreIdentifiedAndStored() {
-        let testSheet = Sheet()
         let theCell = "A21"
         
-        testSheet.put(theCell, "X99")
-        XCTAssertEqual("X99", testSheet.get(theCell))
+        sheet.put(theCell, "X99")
+        XCTAssertEqual("X99", sheet.get(theCell))
         
-        testSheet.put(theCell, "14")
-        XCTAssertEqual("14", testSheet.get(theCell))
+        sheet.put(theCell, "14")
+        XCTAssertEqual("14", sheet.get(theCell))
         
-        testSheet.put(theCell, " 99 X")
-        XCTAssertEqual(" 99 X", testSheet.get(theCell))
+        sheet.put(theCell, " 99 X")
+        XCTAssertEqual(" 99 X", sheet.get(theCell))
         
-        testSheet.put(theCell, " 1234 ")
-        XCTAssertEqual("1234", testSheet.get(theCell))
+        sheet.put(theCell, " 1234 ")
+        XCTAssertEqual("1234", sheet.get(theCell))
         
-        testSheet.put(theCell, " ")
-        XCTAssertEqual("", testSheet.get(theCell))
+        sheet.put(theCell, " ")
+        XCTAssertEqual("", sheet.get(theCell))
     }
     
     func testThatWeHaveAccessToCellLiteralValuesForEditing() {
-        let testSheet = Sheet()
         let theCell = "A21"
         
-        testSheet.put(theCell, "Some string")
-        XCTAssertEqual("Some string", testSheet.getLiteral(theCell))
+        sheet.put(theCell, "Some string")
+        XCTAssertEqual("Some string", sheet.getLiteral(theCell))
         
-        testSheet.put(theCell, " 1234 ")
-        XCTAssertEqual(" 1234 ", testSheet.getLiteral(theCell))
+        sheet.put(theCell, " 1234 ")
+        XCTAssertEqual(" 1234 ", sheet.getLiteral(theCell))
         
-        testSheet.put(theCell, "=7")
-        XCTAssertEqual("=7", testSheet.getLiteral(theCell))
+        sheet.put(theCell, "=7")
+        XCTAssertEqual("=7", sheet.getLiteral(theCell))
     }
     // MARK: - Part 2
     
     func testFormulaSpec() {
-        let testSheet = Sheet()
-        
-        testSheet.put("B1", " =7")
-        XCTAssertEqual(" =7", testSheet.get("B1"))
-        XCTAssertEqual(" =7", testSheet.getLiteral("B1"))
+        sheet.put("B1", " =7")
+        XCTAssertEqual(" =7", sheet.get("B1"))
+        XCTAssertEqual(" =7", sheet.getLiteral("B1"))
     }
     
     func testConstantFormula()  {
-        let testSheet = Sheet()
-        testSheet.put("A1", "=7")
-        XCTAssertEqual("=7", testSheet.getLiteral("A1"))
-        XCTAssertEqual("7", testSheet.get("A1"))
+        sheet.put("A1", "=7")
+        XCTAssertEqual("=7", sheet.getLiteral("A1"))
+        XCTAssertEqual("7", sheet.get("A1"))
         
     }
     
     func testParentheses() {
-        let testSheet = Sheet()
-        testSheet.put("A1", "=(7) ")
-        XCTAssertEqual("7", testSheet.get("A1"))
+        sheet.put("A1", "=(7) ")
+        XCTAssertEqual("7", sheet.get("A1"))
     }
     
     func testDeepParentheses() {
-        let testSheet = Sheet()
-        testSheet.put("A1", "=((((10))))")
-        XCTAssertEqual("10", testSheet.get("A1"))
+        sheet.put("A1", "=((((10))))")
+        XCTAssertEqual("10", sheet.get("A1"))
     }
     
     func testMultiply() {
-        let testSheep = Sheet()
-        testSheep.put("A1", "=2*3*4")
-        XCTAssertEqual("24", testSheep.get("A1"))
+        sheet.put("A1", "=2*3*4")
+        XCTAssertEqual("24", sheet.get("A1"))
     }
     
     func testAdd() {
-        let testSheep = Sheet()
-        testSheep.put("A1", "=71+2+3")
-        XCTAssertEqual("76", testSheep.get("A1"))
+        sheet.put("A1", "=71+2+3")
+        XCTAssertEqual("76", sheet.get("A1"))
     }
     
     func testOperationPrecedence() {
-        let testSheep = Sheet()
-        testSheep.put("A1", "=7+2*3")
-        XCTAssertEqual("13", testSheep.get("A1"))
+        sheet.put("A1", "=7+2*3")
+        XCTAssertEqual("13", sheet.get("A1"))
     }
     
     func testFullExpression() {
-        let testSheep = Sheet()
-        testSheep.put("A1", "=7*(2+3)*((((2+1))))")
-        XCTAssertEqual("105", testSheep.get("A1"))
+        sheet.put("A1", "=7*(2+3)*((((2+1))))")
+        XCTAssertEqual("105", sheet.get("A1"))
     }
 
     func testSimpleFormulaError() {
-        let testSheep = Sheet()
-        testSheep.put("A1", "=7*")
-        XCTAssertEqual("#Error", testSheep.get("A1"))
+        sheet.put("A1", "=7*")
+        XCTAssertEqual("#Error", sheet.get("A1"))
     }
     
     func testParenthesisError() {
-        let testSheep = Sheet()
-        testSheep.put("A1", "=(((((7))")
-        XCTAssertEqual("#Error", testSheep.get("A1"))
+        sheet.put("A1", "=(((((7))")
+        XCTAssertEqual("#Error", sheet.get("A1"))
     }
     
     // MARK: - Part 3
     
     func testThatCellReferenceWorks() {
-        let testSheep = Sheet()
-        testSheep.put("A1", "8")
-        testSheep.put("A2", "=A1")
-        XCTAssertEqual("8", testSheep.get("A2"))
+        sheet.put("A1", "8")
+        sheet.put("A2", "=A1")
+        XCTAssertEqual("8", sheet.get("A2"))
     }
     
     func testThatCellChangesPropagate() {
-        let testSheep = Sheet()
-        testSheep.put("A1", "8")
-        testSheep.put("A2", "=A1")
-        XCTAssertEqual("8", testSheep.get("A2"))
+        sheet.put("A1", "8")
+        sheet.put("A2", "=A1")
+        XCTAssertEqual("8", sheet.get("A2"))
         
-        testSheep.put("A1", "9")
-        XCTAssertEqual("9", testSheep.get("A2"))
+        sheet.put("A1", "9")
+        XCTAssertEqual("9", sheet.get("A2"))
     }
     
-//    func testThatFormulasKnowCellsAndRecalculate() {
-//        let testSheep = Sheet()
-//        testSheep.put("A1", "8")
-//        testSheep.put("A2", "3")
-//        testSheep.put("B1", "=A1*(A1-A2)+A2/3")
-//        XCTAssertEqual("41", testSheep.get("B1"))
-//        
-//        testSheep.put("A2", "6")
-//        XCTAssertEqual("18", testSheep.get("B1"))
-//    }
-//    
+    func testsubtraction() {
+        sheet.put("B1", "5")
+        sheet.put("A1", "=(B1-B1)")
+        XCTAssertEqual("0", sheet.get("A1"))
+    }
     
+    func testThatFormulasKnowCellsAndRecalculate() {
+        sheet.put("A1", "8")
+        sheet.put("A2", "3")
+        sheet.put("B1", "=A1*(A1-A2)+A2/3")
+        XCTAssertEqual("41", sheet.get("B1"))
+
+        sheet.put("A2", "6")
+        XCTAssertEqual("18", sheet.get("B1"))
+    }
+    
+    
+    func testThatDeepPropagationWorks()  {
+        sheet.put("A1", "8")
+        sheet.put("A2", "=A1")
+        sheet.put("A3", "=A2")
+        sheet.put("A4", "=A3")
+        XCTAssertEqual("8", sheet.get("A4"))
+        
+        sheet.put("A2", "6")
+        XCTAssertEqual("6", sheet.get("A4"))
+    }
+    
+    func testThatFormulaWorksWithManyCells()  {
+        sheet.put("A1", "10")
+        sheet.put("A2", "=A1+B1")
+        sheet.put("A3", "=A1+B2")
+        sheet.put("A4", "=A3")
+        sheet.put("B1", "7")
+        sheet.put("B2", "=A2")
+        sheet.put("B3", "=A3-A2")
+        sheet.put("B4", "=A4+B3")
+        
+        XCTAssertEqual("34", sheet.get("A4"))
+        XCTAssertEqual("51", sheet.get("B4"))
+
+    }
+    
+
 }
