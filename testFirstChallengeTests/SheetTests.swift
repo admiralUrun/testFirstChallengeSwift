@@ -196,7 +196,6 @@ class SheetTests: XCTestCase {
         
         XCTAssertEqual("34", sheet.get("A4"))
         XCTAssertEqual("51", sheet.get("B4"))
-
     }
     
 

@@ -2,11 +2,11 @@
 
 ## Expression
 
-expression ->  term | term + expression
+expression ->  term | term + expression | term - expression
 
 ## Term
 
-term -> primary | primary * term 
+term -> primary | primary * term | primary / term
 
 ## Primary
 

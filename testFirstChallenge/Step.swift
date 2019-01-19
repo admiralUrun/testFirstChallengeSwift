@@ -14,7 +14,7 @@ class Step {
         count = getCount
     }
     
-    private var count = 0
+    private let count: Int!
     
     public var index = 0
     
