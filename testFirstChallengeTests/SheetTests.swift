@@ -184,10 +184,18 @@ class SheetTests: XCTestCase {
         XCTAssertEqual("6", sheet.get("A4"))
     }
     
+    func testExpresion() {
+        sheet.put("A1", "10")
+        sheet.put("B1", "7")
+        sheet.put("A2", "=A1+B1")
+        sheet.put("B2", "=A2+A2")
+        XCTAssertEqual("34", sheet.get("B2"))
+    }
+    
     func testThatFormulaWorksWithManyCells()  {
         sheet.put("A1", "10")
         sheet.put("A2", "=A1+B1")
-        sheet.put("A3", "=A1+B2")
+        sheet.put("A3", "=A2+B2")
         sheet.put("A4", "=A3")
         sheet.put("B1", "7")
         sheet.put("B2", "=A2")

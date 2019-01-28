@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		955B553421F0C1F700F6C40D /* Step.swift in Sources */ = {isa = PBXBuildFile; fileRef = 955B553321F0C1F700F6C40D /* Step.swift */; };
+		9509591A21FDDD72003D3426 /* TokenIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9509591921FDDD72003D3426 /* TokenIterator.swift */; };
 		95B7352821C82CA6004C12A7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95B7352721C82CA6004C12A7 /* AppDelegate.swift */; };
 		95B7352A21C82CA6004C12A7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95B7352921C82CA6004C12A7 /* ViewController.swift */; };
 		95B7352D21C82CA6004C12A7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 95B7352B21C82CA6004C12A7 /* Main.storyboard */; };
@@ -37,7 +37,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		955B553321F0C1F700F6C40D /* Step.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Step.swift; sourceTree = "<group>"; };
+		9509591921FDDD72003D3426 /* TokenIterator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenIterator.swift; sourceTree = "<group>"; };
 		95B7352421C82CA6004C12A7 /* testFirstChallenge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testFirstChallenge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		95B7352721C82CA6004C12A7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		95B7352921C82CA6004C12A7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -106,11 +106,11 @@
 				95B7352721C82CA6004C12A7 /* AppDelegate.swift */,
 				95B7352921C82CA6004C12A7 /* ViewController.swift */,
 				95B7352B21C82CA6004C12A7 /* Main.storyboard */,
-				95B7352E21C82CA6004C12A7 /* Assets.xcassets */,
 				95B7353021C82CA6004C12A7 /* LaunchScreen.storyboard */,
-				95B7355521C82CEF004C12A7 /* Sheet.swift */,
+				95B7352E21C82CA6004C12A7 /* Assets.xcassets */,
 				95CC321921D7896A00C15F96 /* Grammar.md */,
-				955B553321F0C1F700F6C40D /* Step.swift */,
+				95B7355521C82CEF004C12A7 /* Sheet.swift */,
+				9509591921FDDD72003D3426 /* TokenIterator.swift */,
 				95B7353321C82CA6004C12A7 /* Info.plist */,
 			);
 			path = testFirstChallenge;
@@ -267,8 +267,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				95B7355721C82D26004C12A7 /* Sheet.swift in Sources */,
+				9509591A21FDDD72003D3426 /* TokenIterator.swift in Sources */,
 				95B7352A21C82CA6004C12A7 /* ViewController.swift in Sources */,
-				955B553421F0C1F700F6C40D /* Step.swift in Sources */,
 				95B7352821C82CA6004C12A7 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

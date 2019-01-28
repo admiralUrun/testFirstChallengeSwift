@@ -8,9 +8,21 @@
 
 import Foundation
 
+typealias Address = String
+
+enum Token {
+    case addition
+    case subtraction
+    case multiplication
+    case division
+    case number(Int)
+    case lp
+    case rp
+    case cell(Address)
+}
+
 class Sheet  {
     
-    typealias Address = String
     private typealias Value = String
     private typealias Number = Int
     
@@ -34,15 +46,11 @@ class Sheet  {
         }
         
         if value.first == "=" {
+            tokens = [Token]()
             tokens = tokenize(formula: Array(value))
-            let getIteator = Step(put: tokens.count)
-            if let number = evalExpression(iterator: getIteator) {
-                if getIteator.index <= tokens.count {
-                    return String(number)
-                } else {
-                    return "#Error"
-                }
-                
+            let getIteator = TokenIterator(tokens)
+            if let number = evalExpression(expression: getIteator) {
+                return String(number)
             } else {
                 return "#Error"
             }
@@ -63,84 +71,68 @@ class Sheet  {
     
     // MARK: - Token
     
-    enum Token {
-        case addition
-        case subtraction
-        case multiplication
-        case division
-        case number(Int)
-        case lp
-        case rp
-        case cell(Address)
-    }
-    
     private func tokenize(formula: [Character]) -> [Token] {
-        let tokenizeIterator = Step(put: formula.count)
-        
-        var tokens = [Token]()
-        var numberBufer = ""
-        while tokenizeIterator.hasNext() {
-            let symbol = String(formula[tokenizeIterator.index])
-            if let _ = Number(symbol) {
-                numberBufer += symbol
-                tokenizeIterator.advance()
-            } else {
-                if !numberBufer.isEmpty {
-                    tokens.append(.number(Number(numberBufer)!))
-                    numberBufer = ""
-                }
+        var index = 0
+        var addresBuffer = ""
+        var numberBuffer = ""
+        while index < formula.count {
+            let symbol = String(formula[index])
+            if !addresBuffer.isEmpty {
+                    while checkConvertInInt(formula: formula, to: index) {
+                        addresBuffer += String(formula[index])
+                        index += 1
+                    }
+                     tokens.append(.cell(addresBuffer))
+                    addresBuffer = ""
                 
-                switch symbol {
-                case"(":
-                    tokens.append(.lp)
-                    tokenizeIterator.advance()
-                case")":
-                    tokens.append(.rp)
-                    tokenizeIterator.advance()
-                case"*":
-                    tokens.append(.multiplication)
-                    tokenizeIterator.advance()
-                case"+":
-                    tokens.append(.addition)
-                    tokenizeIterator.advance()
-                case "=":
-                    tokenizeIterator.advance()
-                case "-":
-                    tokens.append(.subtraction)
-                    tokenizeIterator.advance()
-                case "/":
-                    tokens.append(.division)
-                    tokenizeIterator.advance()
-                case " ":
-                    tokenizeIterator.advance()
-                default:
-                    tokens.append(.cell(cellInToken(formula: formula, cellTokenIterator: tokenizeIterator)))
+            } else {
+                
+                if let _ = Number(symbol) {
+                    numberBuffer += symbol
+                    index += 1
+                } else {
+                    if !numberBuffer.isEmpty {
+                        tokens.append(.number(Number(numberBuffer)!))
+                        numberBuffer = ""
+                    }
+                    
+                    switch symbol {
+                    case"(":
+                        tokens.append(.lp)
+                        index += 1
+                    case")":
+                        tokens.append(.rp)
+                        index += 1
+                    case"*":
+                        tokens.append(.multiplication)
+                        index += 1
+                    case"+":
+                        tokens.append(.addition)
+                        index += 1
+                    case "=":
+                        index += 1
+                    case "-":
+                        tokens.append(.subtraction)
+                        index += 1
+                    case "/":
+                        tokens.append(.division)
+                        index += 1
+                    case " ":
+                        index += 1
+                    default:
+                        while ("A"..."Z").contains(formula[index]) {
+                            addresBuffer += String(formula[index])
+                            index += 1
+                        }
+                    }
                 }
             }
         }
         
-        if !numberBufer.isEmpty {
-            tokens.append(.number(Number(numberBufer)!))
+        if !numberBuffer.isEmpty {
+            tokens.append(.number(Number(numberBuffer)!))
         }
         return tokens
-    }
-    
-    private func cellInToken(formula: [Character], cellTokenIterator:Step) -> Address {
-        var addresBuffer = ""
-        while ("A"..."Z").contains(formula[cellTokenIterator.index]) {
-            addresBuffer += String(formula[cellTokenIterator.index])
-            cellTokenIterator.advance()
-        }
-        
-        if addresBuffer.isEmpty {
-            return "#Error"
-        } else {
-            while checkConvertInInt(formula: formula, to: cellTokenIterator.index) {
-                addresBuffer += String(formula[cellTokenIterator.index])
-                cellTokenIterator.advance()
-            }
-            return addresBuffer
-        }
     }
     
     
@@ -158,19 +150,24 @@ class Sheet  {
     
     // MARK: - Evaluate
     
-    private func evalExpression(iterator expressionStep:Step) -> Number? {
-        if  let left = evalTerm(iterator: expressionStep) {
-            if let token = getToken(iterator: expressionStep) {
+    private func evalExpression(expression: TokenIterator) -> Number? {
+        
+        if  let left = evalTerm(iterator:expression ) {
+            if let token = expression.lookupNext() {
                 switch token {
                 case .addition:
-                    expressionStep.advance()
-                    if let right = evalExpression(iterator: expressionStep) {
+                    let _ = expression.next()
+                    if let right = evalExpression(expression: expression) {
                         return left + right
+                    } else {
+                        return nil
                     }
                 case .subtraction:
-                    expressionStep.advance()
-                    if let right = evalExpression(iterator: expressionStep) {
+                    let _ = expression.next()
+                    if let right = evalExpression(expression: expression) {
                         return left - right
+                    } else {
+                        return nil
                     }
 
                 default:
@@ -181,24 +178,23 @@ class Sheet  {
             }
         } else {
             return nil
-        } 
-        preconditionFailure("Unexpected token")
+        }
     }
     
-    private func evalTerm(iterator termStep: Step) -> Number? {
-        if let left = evalPrimary(iterator: termStep) {
-            if let token = getToken(iterator: termStep) {
+    private func evalTerm(iterator: TokenIterator) -> Number? {
+        if let left = evalPrimary(iterator: iterator) {
+            if let token = iterator.lookupNext() {
                 switch token {
                 case .multiplication:
-                    termStep.advance()
-                    if let right = evalTerm(iterator: termStep) {
+                    let _ = iterator.next()
+                    if let right = evalTerm(iterator: iterator) {
                         return left * right
                     } else {
                         return nil
                     }
                 case .division:
-                    termStep.advance()
-                    if let right = evalTerm(iterator: termStep) {
+                    let _ = iterator.next()
+                    if let right =  evalTerm(iterator: iterator) {
                         return left / right
                     } else {
                         return nil
@@ -214,22 +210,31 @@ class Sheet  {
         }
     }
     
-    private func evalPrimary(iterator primaryStep: Step) -> Number? {
-        if let token = getToken(iterator: primaryStep) {
+    private func evalPrimary(iterator: TokenIterator) -> Number? {
+        if let token = iterator.lookupNext() {
             switch token {
             case .lp:
-                primaryStep.advance()
-                let expression = evalExpression(iterator: primaryStep)
-                primaryStep.advance()
-                return expression
+                let _ = iterator.next()
+                let expression = evalExpression(expression: iterator)
+                if let rp = iterator.next() {
+                    switch rp {
+                    case .rp:
+                    //    let _ = iterator.next()
+                        return expression
+                    default:
+                        return nil
+                    }
+                }
+                return nil
+               // primaryStep.advance()
                 
             case .number(let number):
-                primaryStep.advance()
+                let _ = iterator.next()
                 return number
                 
             case .cell(let adress):
                 if let number = Number(get(adress)) {
-                    primaryStep.advance()
+                    let _ = iterator.next()
                     return number
                 } else {
                     return nil
@@ -241,12 +246,7 @@ class Sheet  {
             return nil
         }
     }
+    // Mark: -
     
-    private func getToken(iterator:Step) -> Token? {
-        if iterator.hasNext() {
-            let token = tokens[iterator.index]
-            return token
-        }
-        return .none
-    }
+    
 }
