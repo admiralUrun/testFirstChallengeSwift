@@ -51,6 +51,7 @@ class Sheet  {
             let getIteator = TokenIterator(tokens)
             if let number = evalExpression(expression: getIteator) {
                 return String(number)
+                
             } else {
                 return "#Error"
             }
@@ -77,19 +78,21 @@ class Sheet  {
         var numberBuffer = ""
         while index < formula.count {
             let symbol = String(formula[index])
+            
             if !addresBuffer.isEmpty {
-                    while checkConvertInInt(formula: formula, to: index) {
-                        addresBuffer += String(formula[index])
-                        index += 1
-                    }
-                     tokens.append(.cell(addresBuffer))
-                    addresBuffer = ""
+                while checkConvertInInt(formula: formula, to: index) {
+                    addresBuffer += String(formula[index])
+                    index += 1
+                }
+                tokens.append(.cell(addresBuffer))
+                addresBuffer = ""
                 
             } else {
                 
                 if let _ = Number(symbol) {
                     numberBuffer += symbol
                     index += 1
+                    
                 } else {
                     if !numberBuffer.isEmpty {
                         tokens.append(.number(Number(numberBuffer)!))
@@ -139,6 +142,7 @@ class Sheet  {
     private func checkConvertInInt(formula: [Character], to index:Int) -> Bool {
         if index >= formula.count {
             return false
+            
         } else {
             if let _ = Number(String(formula[index])) {
                 return true
@@ -155,21 +159,25 @@ class Sheet  {
         if  let left = evalTerm(iterator:expression ) {
             if let token = expression.lookupNext() {
                 switch token {
+                    
                 case .addition:
                     let _ = expression.next()
                     if let right = evalExpression(expression: expression) {
                         return left + right
+                        
                     } else {
                         return nil
                     }
+                    
                 case .subtraction:
                     let _ = expression.next()
                     if let right = evalExpression(expression: expression) {
                         return left - right
+                        
                     } else {
                         return nil
                     }
-
+                    
                 default:
                     return left
                 }
@@ -189,22 +197,27 @@ class Sheet  {
                     let _ = iterator.next()
                     if let right = evalTerm(iterator: iterator) {
                         return left * right
+                        
                     } else {
                         return nil
                     }
+                    
                 case .division:
                     let _ = iterator.next()
                     if let right =  evalTerm(iterator: iterator) {
                         return left / right
+                        
                     } else {
                         return nil
                     }
                 default:
                     return left
                 }
+                
             } else {
                 return left
             }
+            
         } else {
             return nil
         }
@@ -219,14 +232,14 @@ class Sheet  {
                 if let rp = iterator.next() {
                     switch rp {
                     case .rp:
-                    //    let _ = iterator.next()
                         return expression
                     default:
                         return nil
                     }
+                    
+                } else {
+                    return nil
                 }
-                return nil
-               // primaryStep.advance()
                 
             case .number(let number):
                 let _ = iterator.next()
@@ -239,14 +252,13 @@ class Sheet  {
                 } else {
                     return nil
                 }
+                
             default:
                 preconditionFailure("Unexpected token: \(token)")
             }
+            
         } else {
             return nil
         }
     }
-    // Mark: -
-    
-    
 }
