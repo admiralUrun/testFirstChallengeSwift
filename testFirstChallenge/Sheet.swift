@@ -36,7 +36,7 @@ class Sheet  {
     
     private var cells:[Address : Value] = [:]
     
-    enum FormulaError : Error {
+   private enum FormulaError : Error {
         case circularReference(String)
         case syntaxError(String)
     }
@@ -61,9 +61,11 @@ class Sheet  {
                 let tokens = try tokenize(vaule: value)
                 let iterator = TokenIterator(tokens)
                 return String(try eval(expression: iterator))
-            } catch FormulaError.syntaxError(_) {
+            } catch FormulaError.syntaxError(let error) {
+                print(error)
                 return "#Error"
-            } catch FormulaError.circularReference(_) {
+            } catch FormulaError.circularReference(let error) {
+                print(error)
                 return "#Circular"
             } catch {
                 preconditionFailure("Unknown Error")
@@ -84,8 +86,6 @@ class Sheet  {
     }
     
     // MARK: - Token
-    
-    // TODO: make it accept String as formula
     private func tokenize(vaule: String) throws -> [Token] {
         var tokens = [Token]()
         var addresBuffer = ""
@@ -146,7 +146,7 @@ class Sheet  {
         return tokens
     }
     
-    // MARK: - Evaluate
+    // MARK: - Eval
     
     private func eval(expression: TokenIterator) throws -> Number {
         let left = try eval(term:expression)
@@ -204,19 +204,24 @@ class Sheet  {
                 case .some(.rp):
                     return expression
                 default:
-                    throw FormulaError.syntaxError("Expected )")
+                    throw FormulaError.syntaxError("Expected ' ) '")
                 }
                 
             case .number(let number):
                 return number
                 
             case .cell(let address):
+                
+                if getLiteral(address) == "=\(address)" {
+                    throw FormulaError.circularReference("circularReference")
+                }
+                
                 if let number = Number(get(address)) {
                     return number
                 } else {
-                    throw FormulaError.syntaxError("")
+                    throw FormulaError.syntaxError(" get don't return \(address) ")
                 }
-                
+
             default:
                 // TODO: really?
                 preconditionFailure("Unexpected token: \(token)")

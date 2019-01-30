@@ -211,10 +211,10 @@ class SheetTests: XCTestCase {
         XCTAssert(true)
     }
     
-//    func testThatCircularReferencesAdmitIt() {
-//        sheet.put("A1", "=A1")
-//        XCTAssertEqual("#Circular", sheet.get("A1"))
-//    }
-//    
+    func testThatCircularReferencesAdmitIt() {
+        sheet.put("A1", "=A1")
+        XCTAssertEqual("#Circular", sheet.get("A1"))
+    }
+    
 
 }
