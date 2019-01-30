@@ -9,6 +9,7 @@
 import Foundation
 
 typealias Address = String
+typealias Number = Int
 
 enum Token {
     case addition
@@ -21,14 +22,24 @@ enum Token {
     case cell(Address)
 }
 
+//enum ValueOrError {
+//    case value(Number)
+//    case syntaxError
+//    case circularError
+//}
+
 class Sheet  {
     
     private typealias Value = String
-    private typealias Number = Int
     
-    private var tokens = [Token]()
+    private var circular = false
     
     private var cells:[Address : Value] = [:]
+    
+    enum FormulaError : Error {
+        case circularReference(String)
+        case syntaxError(String)
+    }
     
     public func get(_ key: Address) -> String {
         guard let value = cells[key] else {
@@ -46,14 +57,16 @@ class Sheet  {
         }
         
         if value.first == "=" {
-            tokens = [Token]()
-            tokens = tokenize(formula: Array(value))
-            let getIteator = TokenIterator(tokens)
-            if let number = evalExpression(expression: getIteator) {
-                return String(number)
-                
-            } else {
+            do {
+                let tokens = try tokenize(vaule: value)
+                let iterator = TokenIterator(tokens)
+                return String(try eval(expression: iterator))
+            } catch FormulaError.syntaxError(_) {
                 return "#Error"
+            } catch FormulaError.circularReference(_) {
+                return "#Circular"
+            } catch {
+                preconditionFailure("Unknown Error")
             }
         }
         return value
@@ -72,63 +85,58 @@ class Sheet  {
     
     // MARK: - Token
     
-    private func tokenize(formula: [Character]) -> [Token] {
-        var index = 0
+    // TODO: make it accept String as formula
+    private func tokenize(vaule: String) throws -> [Token] {
+        var tokens = [Token]()
         var addresBuffer = ""
         var numberBuffer = ""
-        while index < formula.count {
-            let symbol = String(formula[index])
+        let formula = Array(vaule)
+        
+        for character in formula {
+            let symbol = String(character)
             
             if !addresBuffer.isEmpty {
-                while checkConvertInInt(formula: formula, to: index) {
-                    addresBuffer += String(formula[index])
-                    index += 1
+                if let _ = Number(symbol) {
+                    addresBuffer += symbol
                 }
                 tokens.append(.cell(addresBuffer))
                 addresBuffer = ""
                 
-            } else {
+                continue
+            }
+            
+            if let _ = Number(symbol) {
+                numberBuffer += symbol
+                continue
+            }
+            
+            if !numberBuffer.isEmpty {
+                tokens.append(.number(Number(numberBuffer)!))
+                numberBuffer = ""
+            }
+            
+            switch symbol {
+            case"(":
+                tokens.append(.lp)
+            case")":
+                tokens.append(.rp)
+            case"*":
+                tokens.append(.multiplication)
+            case"+":
+                tokens.append(.addition)
+            case "-":
+                tokens.append(.subtraction)
+            case "/":
+                tokens.append(.division)
                 
-                if let _ = Number(symbol) {
-                    numberBuffer += symbol
-                    index += 1
-                    
-                } else {
-                    if !numberBuffer.isEmpty {
-                        tokens.append(.number(Number(numberBuffer)!))
-                        numberBuffer = ""
-                    }
-                    
-                    switch symbol {
-                    case"(":
-                        tokens.append(.lp)
-                        index += 1
-                    case")":
-                        tokens.append(.rp)
-                        index += 1
-                    case"*":
-                        tokens.append(.multiplication)
-                        index += 1
-                    case"+":
-                        tokens.append(.addition)
-                        index += 1
-                    case "=":
-                        index += 1
-                    case "-":
-                        tokens.append(.subtraction)
-                        index += 1
-                    case "/":
-                        tokens.append(.division)
-                        index += 1
-                    case " ":
-                        index += 1
-                    default:
-                        while ("A"..."Z").contains(formula[index]) {
-                            addresBuffer += String(formula[index])
-                            index += 1
-                        }
-                    }
-                }
+            case "A"..."Z":
+                addresBuffer += String(symbol)
+                
+            case "=", " ":
+                break
+                
+            default:
+                throw FormulaError.syntaxError("Unexpected symbol - \(symbol)")
             }
         }
         
@@ -138,127 +146,83 @@ class Sheet  {
         return tokens
     }
     
-    
-    private func checkConvertInInt(formula: [Character], to index:Int) -> Bool {
-        if index >= formula.count {
-            return false
-            
-        } else {
-            if let _ = Number(String(formula[index])) {
-                return true
-            } else {
-                return false
-            }
-        }
-    }
-    
     // MARK: - Evaluate
     
-    private func evalExpression(expression: TokenIterator) -> Number? {
+    private func eval(expression: TokenIterator) throws -> Number {
+        let left = try eval(term:expression)
         
-        if  let left = evalTerm(iterator:expression ) {
-            if let token = expression.lookupNext() {
-                switch token {
-                    
-                case .addition:
-                    let _ = expression.next()
-                    if let right = evalExpression(expression: expression) {
-                        return left + right
-                        
-                    } else {
-                        return nil
-                    }
-                    
-                case .subtraction:
-                    let _ = expression.next()
-                    if let right = evalExpression(expression: expression) {
-                        return left - right
-                        
-                    } else {
-                        return nil
-                    }
-                    
-                default:
-                    return left
-                }
-            } else {
+        if let token = expression.lookupNext() {
+            switch token {
+            case .addition:
+                let _ = expression.next()
+                let right = try eval(expression: expression)
+                return left + right
+                
+            case .subtraction:
+                let _ = expression.next()
+                let right = try eval(expression: expression)
+                return left - right
+                
+            default:
                 return left
             }
         } else {
-            return nil
+            return left
         }
     }
     
-    private func evalTerm(iterator: TokenIterator) -> Number? {
-        if let left = evalPrimary(iterator: iterator) {
-            if let token = iterator.lookupNext() {
-                switch token {
-                case .multiplication:
-                    let _ = iterator.next()
-                    if let right = evalTerm(iterator: iterator) {
-                        return left * right
-                        
-                    } else {
-                        return nil
-                    }
-                    
-                case .division:
-                    let _ = iterator.next()
-                    if let right =  evalTerm(iterator: iterator) {
-                        return left / right
-                        
-                    } else {
-                        return nil
-                    }
-                default:
-                    return left
-                }
+    private func eval(term: TokenIterator) throws -> Number {
+        let left = try eval(primary: term)
+        if let token = term.lookupNext() {
+            switch token {
+            case .multiplication:
+                let _ = term.next()
+                let right = try eval(term: term)
+                return left * right
                 
-            } else {
+            case .division:
+                let _ = term.next()
+                let right =  try eval(term: term)
+                return left / right
+                
+            default:
                 return left
             }
             
         } else {
-            return nil
+            return left
         }
     }
     
-    private func evalPrimary(iterator: TokenIterator) -> Number? {
-        if let token = iterator.lookupNext() {
+    private func eval(primary: TokenIterator) throws -> Number {
+        if let token = primary.next() {
             switch token {
             case .lp:
-                let _ = iterator.next()
-                let expression = evalExpression(expression: iterator)
-                if let rp = iterator.next() {
-                    switch rp {
-                    case .rp:
-                        return expression
-                    default:
-                        return nil
-                    }
-                    
-                } else {
-                    return nil
+                let expression = try eval(expression: primary)
+                
+                switch primary.next() {
+                case .some(.rp):
+                    return expression
+                default:
+                    throw FormulaError.syntaxError("Expected )")
                 }
                 
             case .number(let number):
-                let _ = iterator.next()
                 return number
                 
-            case .cell(let adress):
-                if let number = Number(get(adress)) {
-                    let _ = iterator.next()
+            case .cell(let address):
+                if let number = Number(get(address)) {
                     return number
                 } else {
-                    return nil
+                    throw FormulaError.syntaxError("")
                 }
                 
             default:
+                // TODO: really?
                 preconditionFailure("Unexpected token: \(token)")
             }
-            
         } else {
-            return nil
+            throw FormulaError.syntaxError("Expected primary")
         }
     }
 }

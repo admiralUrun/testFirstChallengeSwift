@@ -206,5 +206,15 @@ class SheetTests: XCTestCase {
         XCTAssertEqual("51", sheet.get("B4"))
     }
     
+    func testThatCircularReferenceDoesntCrash() {
+        sheet.put("A1", "=A1")
+        XCTAssert(true)
+    }
+    
+//    func testThatCircularReferencesAdmitIt() {
+//        sheet.put("A1", "=A1")
+//        XCTAssertEqual("#Circular", sheet.get("A1"))
+//    }
+//    
 
 }
