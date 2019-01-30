@@ -32,8 +32,6 @@ class Sheet  {
     
     private typealias Value = String
     
-    private var circular = false
-    
     private var cells:[Address : Value] = [:]
     
    private enum FormulaError : Error {
